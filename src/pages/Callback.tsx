@@ -15,7 +15,7 @@ export default function Callback() {
     const code = searchParams.get("code");
 
     if (!state || !code) {
-      // navigate("/");
+      navigate("/");
       return;
     }
 
@@ -39,12 +39,12 @@ export default function Callback() {
 
           const profile = await checkAuth();
           setProfile(profile);
-          // navigate("/");
+          navigate("/");
         }
       } catch (error) {
         console.error("Authentication failed:", error);
         setProfile(null);
-        // navigate("/");
+        navigate("/");
       }
     }
 
