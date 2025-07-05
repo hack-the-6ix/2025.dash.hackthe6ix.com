@@ -9,7 +9,7 @@ import Text from "../components/Text/Text";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchHt6 } from "../api/client";
-import type { AuthResponse, CallbackPayload } from "../auth/types";
+import type { AuthResponse, CallbackPayload } from "../components/types";
 import { checkAuth } from "../auth/middleware";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -23,10 +23,10 @@ export default function Callback() {
     const state = searchParams.get("state");
     const code = searchParams.get("code");
 
-    if (!state || !code) {
-      navigate("/");
-      return;
-    }
+    // if (!state || !code) {
+    //   navigate("/");
+    //   return;
+    // }
 
     async function setSession() {
       try {
@@ -48,12 +48,12 @@ export default function Callback() {
 
           const profile = await checkAuth();
           setProfile(profile);
-          navigate("/");
+          // navigate("/");
         }
       } catch (error) {
         console.error("Authentication failed:", error);
         setProfile(null);
-        navigate("/");
+        // navigate("/");
       }
     }
 

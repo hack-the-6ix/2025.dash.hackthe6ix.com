@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import type { Profile } from "../auth/types";
+import type { Profile } from "../components/types";
 
 interface AuthContextType {
   profile: Profile | null;

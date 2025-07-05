@@ -19,9 +19,10 @@ import { Link } from "react-router-dom";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
+import { checkAuth } from "../auth/middleware";
 
 export default function Home() {
-  const { profile } = useAuth();
+  const { profile, setProfile } = useAuth();
   const GRASSCOUNT = 40;
   const [modalType, setModalType] = useState<null | "deny" | "accept">(null);
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,8 @@ export default function Home() {
         });
       }
       setModalType(null);
-      window.location.reload();
+      const newProfile = await checkAuth();
+      setProfile(newProfile);
     } catch (error: unknown) {
       if (
         typeof error === "object" &&
@@ -139,7 +141,22 @@ export default function Home() {
         </div>
       )}
 
-      {profile?.status.accepted === true && (
+      {profile?.status.confirmed === true && (
+        <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
+          <Text textType="heading-lg" textColor="secondary" className="mb-4">
+            You're confirmed!
+          </Text>
+          <Text textType="heading-md" textColor="primary" className="mb-4">
+            Thank you for confirming your attendance at Hack the 6ix 2025.
+          </Text>
+          <Text textType="paragraph-lg" textColor="primary" className="mb-4">
+            We can't wait to see you at the event. Check back for more details
+            soon!
+          </Text>
+        </div>
+      )}
+
+      {profile?.status.accepted === true && !profile?.status.confirmed && (
         <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
           <Text
             textType="heading-md"

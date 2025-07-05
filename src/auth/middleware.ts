@@ -1,5 +1,5 @@
 import { fetchHt6 } from "../api/client";
-import type { AuthResponse, LoginPayload, Profile } from "./types";
+import type { AuthResponse, LoginPayload, Profile } from "../components/types";
 
 export async function checkAuth(): Promise<Profile | null> {
   const token = localStorage.getItem("token");

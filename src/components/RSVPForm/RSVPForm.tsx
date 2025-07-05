@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Text from "../Text/Text";
+import { useAuth } from "../../contexts/AuthContext";
+import FileUpload from "../FileUpload/FileUpload";
 
 interface RSVPFormProps {
   onSubmit: (data: { age: number; waiverAgreed: boolean }) => void;
@@ -12,15 +14,21 @@ export default function RSVPForm({
   onCancel,
   loading = false
 }: RSVPFormProps) {
+  const { profile } = useAuth();
   const [age, setAge] = useState("");
-  const [waiverAgreed, setWaiverAgreed] = useState(false);
-  const [errors, setErrors] = useState<{ age?: string; waiver?: string }>({});
+  const [errors, setErrors] = useState<{
+    age?: string;
+    waiver?: string;
+    file?: string;
+  }>({});
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const isFormValid = age.trim() !== "" && waiverAgreed;
+  const isFormValid = age.trim() !== "" && file && !uploading;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: { age?: string; waiver?: string } = {};
+    const newErrors: { age?: string; waiver?: string; file?: string } = {};
 
     if (!age) {
       newErrors.age = "Age is required";
@@ -31,8 +39,8 @@ export default function RSVPForm({
       }
     }
 
-    if (!waiverAgreed) {
-      newErrors.waiver = "You must agree to the waiver to continue";
+    if (!file) {
+      newErrors.file = "You must upload your signed waiver";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -40,7 +48,34 @@ export default function RSVPForm({
       return;
     }
 
-    onSubmit({ age: parseInt(age), waiverAgreed });
+    if (!profile) {
+      setErrors({ file: "User profile not loaded. Please refresh." });
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    if (file) {
+      formData.append("waiver", file);
+    }
+    try {
+      const token = localStorage.getItem("token");
+      const baseUrl =
+        import.meta.env.VITE_API_URL || "https://api.hackthe6ix.com";
+      const res = await fetch(`${baseUrl}/api/action/updateWaiver`, {
+        method: "PUT",
+        headers: token ? { "X-Access-Token": token } : {},
+        body: formData
+      });
+      if (!res.ok) {
+        throw new Error("Failed to upload file");
+      }
+      setUploading(false);
+      onSubmit({ age: parseInt(age), waiverAgreed: true });
+    } catch {
+      setUploading(false);
+      setErrors({ file: "Failed to upload file. Please try again." });
+    }
   };
 
   return (
@@ -65,39 +100,41 @@ export default function RSVPForm({
         )}
       </div>
 
-      <div className="flex items-start space-x-3">
-        <input
-          type="checkbox"
-          id="waiver"
-          checked={waiverAgreed}
-          onChange={(e) => setWaiverAgreed(e.target.checked)}
-          className="mt-1 h-4 w-4 text-[#00887E] focus:ring-[#00887E] border-gray-300 rounded"
-        />
-        <label htmlFor="waiver" className="flex-1">
-          <Text textType="paragraph-lg" textColor="primary">
-            I agree to the{" "}
-            <a
-              href="#"
-              className="text-[#00887E] underline hover:no-underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Hack the 6ix waiver and terms of participation
-            </a>
-          </Text>
-        </label>
-      </div>
-      {errors.waiver && (
-        <Text textType="paragraph-sm" className="text-red-500 mt-1">
-          {errors.waiver}
+      <div className="flex flex-col">
+        <Text textType="paragraph-lg" textColor="primary" className="mb-2">
+          Upload your signed{" "}
+          <a
+            href="https://drive.google.com/file/d/1to4eMVKJRom-X7RA7Jdv5eZFIg8JG0Fn/view?usp=sharing"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[#00887E] underline hover:no-underline"
+          >
+            waiver
+          </a>
+          :
         </Text>
-      )}
+        <FileUpload
+          onChange={(f) => {
+            setFile(f);
+            setErrors((prev) => ({ ...prev, file: undefined }));
+          }}
+          value={file}
+          accept="application/pdf"
+          // backgroundColor="black"
+          // textColor="red"
+        />
+        {errors.file && (
+          <Text textType="paragraph-sm" className="text-red-500 mt-1">
+            {errors.file}
+          </Text>
+        )}
+      </div>
 
       <div className="flex gap-4 justify-center mt-6">
         <button
           type="button"
           onClick={onCancel}
-          disabled={loading}
+          disabled={loading || uploading}
           className="bg-white text-[#00887E] border border-[#00887E] rounded-xl font-bold text-[16px] py-2 px-4 flex-1 disabled:opacity-50"
         >
           Cancel
@@ -107,7 +144,7 @@ export default function RSVPForm({
           disabled={loading || !isFormValid}
           className="bg-[#00887E] text-white rounded-xl font-bold text-[16px] py-2 px-4 flex-1 disabled:opacity-50"
         >
-          {loading ? "Submitting..." : "Accept Invitation"}
+          {loading || uploading ? "Submitting..." : "Accept Invitation"}
         </button>
       </div>
     </form>
