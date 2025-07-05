@@ -24,6 +24,7 @@ export interface Profile {
   email: string;
   status: {
     accepted: boolean;
+    textStatus: string;
     rejected: boolean;
     declined: boolean;
     confirmed: boolean;

@@ -1,4 +1,5 @@
 import grassSVG from "../assets/grass.svg";
+import { useEffect } from "react";
 import tree1SVG from "../assets/tree1.svg";
 import cloudSVG from "../assets/cloudsLaptop.svg";
 import cloudPhoneSVG from "../assets/cloudsPhone.svg";
@@ -8,6 +9,13 @@ import Text from "../components/Text/Text";
 import Modal from "../components/Modal/Modal";
 import RSVPForm from "../components/RSVPForm/RSVPForm";
 import { updateRSVP } from "../api/client";
+import Button from "../components/Button/Button";
+import { ArrowRight } from "lucide-react";
+import { FaFacebook } from "react-icons/fa";
+import { FaInstagram } from "react-icons/fa";
+import { FaTwitter } from "react-icons/fa6";
+import { FaLinkedin } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
@@ -17,6 +25,10 @@ export default function Home() {
   const GRASSCOUNT = 40;
   const [modalType, setModalType] = useState<null | "deny" | "accept">(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    console.log(profile);
+  }, []);
 
   const handleRSVP = async (
     attending: boolean,
@@ -28,15 +40,15 @@ export default function Home() {
         await updateRSVP({
           rsvp: {
             attending: true,
-            form: formData
-          }
+            form: formData,
+          },
         });
       } else {
         await updateRSVP({
           rsvp: {
             attending: false,
-            form: { age: 0, waiverAgreed: false }
-          }
+            form: { age: 0, waiverAgreed: false },
+          },
         });
       }
       setModalType(null);
@@ -120,7 +132,7 @@ export default function Home() {
         />
       </div>
 
-      {profile?.status.accepted === true && (
+      {profile?.status.accepted === true && !profile?.status.declined && (
         <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
           <Text
             textType="heading-md"
@@ -157,20 +169,13 @@ export default function Home() {
             To confirm your attendance, please RSVP below by{" "}
             <span className="text-[#EE721D]">July 10</span>.
           </Text>
-          <div className="flex gap-2 items-center mt-8">
-            <button
-              className="bg-transparent text-[#00887E] border border-[#00887E] rounded-[8px] px-[24px] py-[12px] font-bold"
-              onClick={() => setModalType("deny")}
-            >
-              <p>I can no longer attend</p>
-            </button>
-
-            <button
-              className="bg-[#00887E] text-white rounded-[8px] px-[24px] py-[12px] font-bold"
-              onClick={() => setModalType("accept")}
-            >
-              <p>Accept Invitation</p>
-            </button>
+          <div className="flex sm:flex-row flex-col gap-2 items-center mt-8 w-full justify-center">
+            <Button onClick={() => setModalType("deny")} variant="back">
+              I can no longer attend
+            </Button>
+            <Button onClick={() => setModalType("accept")}>
+              Accept Invitation
+            </Button>
           </div>
         </div>
       )}
@@ -190,21 +195,17 @@ export default function Home() {
           This opportunity will be passed onto a waitlisted participant. This
           action cannot be undone.
         </Text>
-        <div className="flex gap-4 justify-center mt-2">
-          <button
-            className="bg-white text-[#00887E] border border-[#00887E] rounded-xl font-bold text-[16px] py-2 px-4 flex-1"
-            onClick={() => handleRSVP(false)}
-            disabled={loading}
-          >
+        <div className="flex sm:flex-row flex-col gap-4 justify-center mt-2">
+          <Button onClick={() => handleRSVP(false)} disabled={loading}>
             {loading ? "Submitting..." : "I can no longer attend"}
-          </button>
-          <button
-            className="bg-[#00887E] text-white rounded-xl font-bold text-[16px] py-2 px-4 flex-1"
+          </Button>
+          <Button
+            variant="back"
             onClick={() => setModalType(null)}
             disabled={loading}
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </Modal>
       <Modal open={modalType === "accept"} onClose={() => setModalType(null)}>
@@ -228,7 +229,7 @@ export default function Home() {
           loading={loading}
         />
       </Modal>
-
+      {/* profile?.status.waitlisted ===  */}
       {profile?.status.waitlisted === true && (
         <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
           <Text
@@ -266,14 +267,20 @@ export default function Home() {
           >
             Have a question? Feel free to reach out to us!
           </Text>
-          <div className="flex gap-2 items-center mt-8">
-            <button
-              className="bg-transparent text-[#00887E] transition-opacity border border-[#00887E] cursor-pointer hover:opacity-75 rounded-[8px] px-[24px] py-[12px] font-bold"
-              onClick={() => window.open("mailto:hello@hackthe6ix.com")}
-            >
+          <div className="flex gap-2 items-center mt-8 sm:w-auto w-full">
+            <Button onClick={() => window.open("mailto:hello@hackthe6ix.com")}>
               <p>Email HT6</p>
-            </button>
+            </Button>
           </div>
+          <Text
+            textType="paragraph-lg"
+            textColor="secondary"
+            className="!font-semibold mt-8"
+          >
+            <span className="text-[#EE721D] underline hover:text-[#cc5e12] flex flex-row">
+              <ArrowRight className="mr-2" /> Review your application
+            </span>
+          </Text>
         </div>
       )}
 
@@ -315,6 +322,49 @@ export default function Home() {
           >
             Have a question? Feel free to reach out to us!
           </Text>
+          <div className="flex gap-2 items-center mt-8 sm:w-auto w-full">
+            <Button onClick={() => window.open("mailto:hello@hackthe6ix.com")}>
+              <p>Email HT6</p>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {profile?.status.applied === false && (
+        <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
+          <Text
+            textType="heading-md"
+            textColor="primary"
+            className="z-[100] mb-8 text-center"
+          >
+            Welcome back,{" "}
+            {profile?.firstName && profile?.lastName ? (
+              <span>
+                {profile?.firstName} {profile?.lastName}
+              </span>
+            ) : (
+              <span>hacker</span>
+            )}
+            !
+          </Text>
+          <Text textType="heading-lg" textColor="secondary">
+            You did <span className="text-[#E42027]">not </span>submit an
+            application to Hack the 6ix this year.
+          </Text>
+          <Text
+            textType="paragraph-lg"
+            textColor="primary"
+            className="text-center mt-6"
+          >
+            Please apply to Hack the 6ix next year!
+          </Text>
+          <Text
+            textType="paragraph-lg"
+            textColor="secondary"
+            className="!font-semibold mt-4"
+          >
+            Have a question? Feel free to reach out to us!
+          </Text>
           <div className="flex gap-2 items-center mt-8">
             <button
               className="bg-transparent text-[#00887E] transition-opacity border border-[#00887E] cursor-pointer hover:opacity-75 rounded-[8px] px-[24px] py-[12px] font-bold"
@@ -322,6 +372,83 @@ export default function Home() {
             >
               <p>Email HT6</p>
             </button>
+          </div>
+        </div>
+      )}
+
+      {profile?.status.declined && (
+        <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
+          <Text
+            textType="heading-md"
+            textColor="primary"
+            className="z-[100] mb-8 text-center"
+          >
+            Bye,{" "}
+            {profile?.firstName && profile?.lastName ? (
+              <span>
+                {profile?.firstName} {profile?.lastName}
+              </span>
+            ) : (
+              <span>hacker</span>
+            )}
+            !
+          </Text>
+          <Text textType="heading-lg" textColor="secondary">
+            We're sad to see you go!
+          </Text>
+          <Text
+            textType="paragraph-lg"
+            textColor="primary"
+            className="text-center mt-6"
+          >
+            Thank you for letting us know you will{" "}
+            <span className="text-[#EE721D]">no longer be attending</span> Hack
+            The 6ix 2025. We hope to see you next year!
+          </Text>
+
+          <div className="w-full sm:w-[60%] h-[1px] bg-[#08566B] my-6"></div>
+
+          <Text
+            textType="paragraph-lg"
+            textColor="secondary"
+            className="!font-semibold"
+          >
+            In the meantime, let's stay connected:
+          </Text>
+
+          <div className="flex flex-row gap-6 items-center mt-6 text-[#08566B] text-[20px] sm:text-[30px]">
+            <Link
+              to="https://www.facebook.com/Hackthe6ix/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Hack the 6ix on Facebook"
+            >
+              <FaFacebook />
+            </Link>
+            <Link
+              to="https://www.instagram.com/hackthe6ix/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Hack the 6ix on Instagram"
+            >
+              <FaInstagram />
+            </Link>
+            <Link
+              to="https://www.linkedin.com/company/hackthe6ixofficial/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Hack the 6ix on Linkedin"
+            >
+              <FaLinkedin />
+            </Link>
+            <Link
+              to="https://x.com/hackthe6ix/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Hack the 6ix on Twitter"
+            >
+              <FaTwitter />
+            </Link>
           </div>
         </div>
       )}

@@ -3,7 +3,7 @@ import React from "react";
 export default function Modal({
   open,
   onClose,
-  children
+  children,
 }: {
   open: boolean;
   onClose: () => void;
@@ -11,7 +11,7 @@ export default function Modal({
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-black/20 z-[1000] flex items-center justify-center">
+    <div className="fixed inset-0 w-screen h-screen bg-black/20 backdrop-blur-sm z-[1000] flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-lg p-6 min-w-[340px] max-w-[500px] w-[90vw] text-center relative">
         {children}
         <button
