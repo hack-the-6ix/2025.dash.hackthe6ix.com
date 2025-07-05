@@ -13,7 +13,6 @@ function AppContent() {
     const authenticate = async () => {
       const profile = await checkAuth();
       setProfile(profile);
-      console.log(profile);
     };
     authenticate();
   }, [setProfile]);

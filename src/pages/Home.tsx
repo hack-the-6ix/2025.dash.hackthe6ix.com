@@ -40,15 +40,15 @@ export default function Home() {
         await updateRSVP({
           rsvp: {
             attending: true,
-            form: formData,
-          },
+            form: formData
+          }
         });
       } else {
         await updateRSVP({
           rsvp: {
             attending: false,
-            form: { age: 0, waiverAgreed: false },
-          },
+            form: { age: 0, waiverAgreed: false }
+          }
         });
       }
       setModalType(null);
@@ -74,6 +74,7 @@ export default function Home() {
       setLoading(false);
     }
   };
+  console.log(profile);
 
   const handleAcceptFormSubmit = (formData: {
     age: number;
@@ -132,7 +133,13 @@ export default function Home() {
         />
       </div>
 
-      {profile?.status.accepted === true && !profile?.status.declined && (
+      {!profile && (
+        <div>
+          <Text textType="heading-lg">Loading...</Text>
+        </div>
+      )}
+
+      {profile?.status.accepted === true && (
         <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
           <Text
             textType="heading-md"
@@ -452,6 +459,31 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {profile &&
+        !profile.status.accepted &&
+        !profile.status.rejected &&
+        !profile.status.waitlisted && (
+          <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
+            <Text textType="heading-lg" textColor="secondary" className="mb-4">
+              You shouldn't be here!
+            </Text>
+            <Text
+              textType="paragraph-lg"
+              textColor="primary"
+              className="text-center"
+            >
+              If you think this is a mistake, please contact us at{" "}
+              <a
+                href="mailto:hello@hackthe6ix.com"
+                className="underline text-[#00887E]"
+              >
+                hello@hackthe6ix.com
+              </a>
+              .
+            </Text>
+          </div>
+        )}
     </div>
   );
 }
