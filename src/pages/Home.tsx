@@ -203,7 +203,7 @@ export default function Home() {
             className="!font-semibold mt-4"
           >
             To confirm your attendance, please RSVP below by{" "}
-            <span className="text-[#EE721D]">July 10</span>.
+            <span className="text-[#EE721D]">July 8</span>.
           </Text>
           <div className="flex sm:flex-row flex-col gap-2 items-center mt-8 w-full justify-center">
             <Button onClick={() => setModalType("deny")} variant="back">
