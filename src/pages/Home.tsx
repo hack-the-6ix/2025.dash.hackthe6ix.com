@@ -153,10 +153,22 @@ export default function Home() {
             We can't wait to see you at the event. Check back for more details
             soon!
           </Text>
+          <Text
+            textType="paragraph-lg"
+            textColor="secondary"
+            className="!font-semibold mt-4"
+          >
+            Have a question? Feel free to reach out to us!
+          </Text>
+          <div className="flex gap-2 items-center mt-4 sm:w-auto w-full">
+            <Button onClick={() => window.open("mailto:hello@hackthe6ix.com")}>
+              <p>Email HT6</p>
+            </Button>
+          </div>
         </div>
       )}
 
-      {profile?.status.accepted === true && !profile?.status.confirmed && (
+      {profile?.status.accepted === true && !profile?.status.confirmed && !profile?.status.declined && (
         <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
           <Text
             textType="heading-md"
@@ -287,23 +299,8 @@ export default function Home() {
           <Text
             textType="paragraph-lg"
             textColor="secondary"
-            className="!font-semibold mt-4"
-          >
-            Have a question? Feel free to reach out to us!
-          </Text>
-          <div className="flex gap-2 items-center mt-8 sm:w-auto w-full">
-            <Button onClick={() => window.open("mailto:hello@hackthe6ix.com")}>
-              <p>Email HT6</p>
-            </Button>
-          </div>
-          <Text
-            textType="paragraph-lg"
-            textColor="secondary"
             className="!font-semibold mt-8"
           >
-            <span className="text-[#EE721D] underline hover:text-[#cc5e12] flex flex-row">
-              <ArrowRight className="mr-2" /> Review your application
-            </span>
           </Text>
         </div>
       )}
@@ -335,7 +332,7 @@ export default function Home() {
             className="text-center mt-6"
           >
             Thank you for your enthusiasm and dedication in applying to Hack the
-            6ix 2024. We received an overwhelming amount of applications this
+            6ix 2025. We received an overwhelming amount of applications this
             year, and after careful consideration, we regret to inform you that
             your application was not chosen for this year's hackathon.
           </Text>
@@ -344,11 +341,11 @@ export default function Home() {
             textColor="secondary"
             className="!font-semibold mt-4"
           >
-            Have a question? Feel free to reach out to us!
+            Interested in volunteering? Sign ups close on July 7th
           </Text>
-          <div className="flex gap-2 items-center mt-8 sm:w-auto w-full">
-            <Button onClick={() => window.open("mailto:hello@hackthe6ix.com")}>
-              <p>Email HT6</p>
+          <div className="flex gap-2 items-center mt-4 sm:w-auto w-full">
+            <Button onClick={() => window.open("https://go.hackthe6ix.com/ktD2kt", "_blank")}>
+              <p>Volunteer at HT6</p>
             </Button>
           </div>
         </div>
@@ -380,7 +377,7 @@ export default function Home() {
             textColor="primary"
             className="text-center mt-6"
           >
-            Please apply to Hack the 6ix next year!
+            We look forward to welcoming you to a future event!
           </Text>
           <Text
             textType="paragraph-lg"
@@ -389,7 +386,7 @@ export default function Home() {
           >
             Have a question? Feel free to reach out to us!
           </Text>
-          <div className="flex gap-2 items-center mt-8">
+          <div className="flex gap-2 items-center mt-4">
             <button
               className="bg-transparent text-[#00887E] transition-opacity border border-[#00887E] cursor-pointer hover:opacity-75 rounded-[8px] px-[24px] py-[12px] font-bold"
               onClick={() => window.open("mailto:hello@hackthe6ix.com")}
@@ -432,15 +429,18 @@ export default function Home() {
 
           <div className="w-full sm:w-[60%] h-[1px] bg-[#08566B] my-6"></div>
 
-          <Text
+          
+        </div>
+      )}
+      <Text
             textType="paragraph-lg"
             textColor="secondary"
-            className="!font-semibold"
+            className="!font-semibold mt-8"
           >
-            In the meantime, let's stay connected:
+            Let's stay connected:
           </Text>
 
-          <div className="flex flex-row gap-6 items-center mt-6 text-[#08566B] text-[20px] sm:text-[30px]">
+          <div className="flex flex-row gap-6 items-center mt-4 text-[#08566B] text-[20px] sm:text-[30px]">
             <Link
               to="https://www.facebook.com/Hackthe6ix/"
               target="_blank"
@@ -474,8 +474,6 @@ export default function Home() {
               <FaTwitter />
             </Link>
           </div>
-        </div>
-      )}
 
       {profile &&
         !profile.status.accepted &&
