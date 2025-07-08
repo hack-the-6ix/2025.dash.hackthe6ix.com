@@ -1,5 +1,4 @@
 import grassSVG from "../assets/grass.svg";
-import { useEffect } from "react";
 import tree1SVG from "../assets/tree1.svg";
 import cloudSVG from "../assets/cloudsLaptop.svg";
 import cloudPhoneSVG from "../assets/cloudsPhone.svg";
@@ -26,10 +25,6 @@ export default function Home() {
   const [modalType, setModalType] = useState<null | "deny" | "accept">(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    console.log(profile);
-  }, []);
-
   const handleRSVP = async (
     attending: boolean,
     formData?: { age: number; waiverAgreed: boolean }
@@ -52,8 +47,14 @@ export default function Home() {
         });
       }
       setModalType(null);
-      const newProfile = await checkAuth();
-      setProfile(newProfile);
+      const result = await checkAuth();
+      if (!result.error) {
+        setProfile(result.profile);
+      } else if (result.error.type === "auth_failed") {
+        // For API errors, just log and continue - don't disrupt user flow
+        console.log("Profile refresh failed after RSVP:", result.error.message);
+        // Keep current profile state rather than clearing it
+      }
     } catch (error: unknown) {
       if (
         typeof error === "object" &&
@@ -75,7 +76,6 @@ export default function Home() {
       setLoading(false);
     }
   };
-  console.log(profile);
 
   const handleAcceptFormSubmit = (formData: {
     age: number;

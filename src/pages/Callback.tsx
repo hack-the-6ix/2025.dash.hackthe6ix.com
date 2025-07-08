@@ -10,7 +10,6 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchHt6 } from "../api/client";
 import type { AuthResponse, CallbackPayload } from "../components/types";
-import { checkAuth } from "../auth/middleware";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Callback() {
@@ -23,10 +22,10 @@ export default function Callback() {
     const state = searchParams.get("state");
     const code = searchParams.get("code");
 
-    // if (!state || !code) {
-    //   navigate("/");
-    //   return;
-    // }
+    if (!state || !code) {
+      navigate("/");
+      return;
+    }
 
     async function setSession() {
       try {
@@ -37,7 +36,7 @@ export default function Callback() {
             body: { state: state || "", code: code || "" }
           }
         );
-
+        
         if (
           response.status === 200 &&
           response.message.token &&
@@ -45,15 +44,18 @@ export default function Callback() {
         ) {
           localStorage.setItem("token", response.message.token);
           localStorage.setItem("refreshToken", response.message.refreshToken);
+          
+          // Clear redirect tracking on successful authentication
+          sessionStorage.removeItem("auth_redirects");
 
-          const profile = await checkAuth();
-          setProfile(profile);
-          // navigate("/");
+          // Don't call checkAuth() here - it has redirect logic that can cause loops
+          // Just navigate away from the callback page
+          navigate("/");
         }
       } catch (error) {
         console.error("Authentication failed:", error);
         setProfile(null);
-        // navigate("/");
+        navigate("/");
       }
     }
 
