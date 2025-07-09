@@ -5,18 +5,16 @@ import cloudPhoneSVG from "../assets/cloudsPhone.svg";
 import cloudMiddle from "../assets/cloudMiddle.svg";
 import firefly from "../assets/firefly.svg";
 import Text from "../components/Text/Text";
+import { Copy } from "lucide-react";
+import { FaDiscord } from "react-icons/fa";
+import { ArrowRight } from "lucide-react";
 import Modal from "../components/Modal/Modal";
-import RSVPForm from "../components/RSVPForm/RSVPForm";
 import { updateRSVP } from "../api/client";
+import { getCheckinQR } from "../api/client";
 import Button from "../components/Button/Button";
-import { FaFacebook } from "react-icons/fa";
-import { FaInstagram } from "react-icons/fa";
-import { FaTwitter } from "react-icons/fa6";
-import { FaLinkedin } from "react-icons/fa6";
-import { Link } from "react-router-dom";
 
 import { useAuth } from "../contexts/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { checkAuth } from "../auth/middleware";
 
 export default function Home() {
@@ -24,6 +22,23 @@ export default function Home() {
   const GRASSCOUNT = 40;
   const [modalType, setModalType] = useState<null | "deny" | "accept">(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [qr, setQr] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    getCheckinQR()
+      .then((dataUri) => {
+        setQr(dataUri);
+      })
+      .catch((err: any) => {
+        console.error(err);
+        setError("Failed to load QR code");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   const handleRSVP = async (
     attending: boolean,
@@ -35,15 +50,15 @@ export default function Home() {
         await updateRSVP({
           rsvp: {
             attending: true,
-            form: formData
-          }
+            form: formData,
+          },
         });
       } else {
         await updateRSVP({
           rsvp: {
             attending: false,
-            form: { age: 0, waiverAgreed: false }
-          }
+            form: { age: 0, waiverAgreed: false },
+          },
         });
       }
       setModalType(null);
@@ -77,12 +92,9 @@ export default function Home() {
     }
   };
 
-  const handleAcceptFormSubmit = (formData: {
-    age: number;
-    waiverAgreed: boolean;
-  }) => {
-    handleRSVP(true, formData);
-  };
+  useEffect(() => {
+    console.log("hi", profile);
+  }, []);
 
   return (
     <div className="sm:gap-0 gap-4 overflow-hidden p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] h-[100vh] w-full flex flex-col justify-center items-center text-center overflow-x-hidden">
@@ -134,88 +146,295 @@ export default function Home() {
         />
       </div>
 
-      {!profile && (
+      {!profile ? (
         <div>
           <Text textType="heading-lg">Loading...</Text>
         </div>
-      )}
-
-      {profile?.status.confirmed === true && (
-        <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
-          <Text textType="heading-lg" textColor="secondary" className="mb-4">
-            You're confirmed!
-          </Text>
-          <Text textType="heading-md" textColor="primary" className="mb-4">
-            Thank you for confirming your attendance at Hack the 6ix 2025.
-          </Text>
-          <Text textType="paragraph-lg" textColor="primary" className="mb-4">
-            We can't wait to see you at the event. Check back for more details
-            soon!
+      ) : (
+        <div className="flex flex-col sm:items-start items-center justify-center z-10 w-full max-w-[1150px] mx-auto px-4">
+          <Text
+            textType="heading-md"
+            textColor="primary"
+            className="z-[100] mb-4 sm:text-start text-center"
+          >
+            Welcome back,{" "}
+            {profile?.firstName && profile?.lastName ? (
+              <span>
+                {profile?.firstName} {profile?.lastName}
+              </span>
+            ) : (
+              <span>hacker</span>
+            )}
+            !
           </Text>
           <Text
             textType="paragraph-lg"
-            textColor="secondary"
-            className="!font-semibold mt-4"
+            textColor="primary"
+            className="z-[100] mb-4 text-center"
           >
-            Have a question? Feel free to reach out to us!
+            <span className="text-[#00786D]">
+              Explore your dashboard below to find out what you can do before
+              the event starts on{" "}
+              <span className="text-[#EE721E]">July 18th.</span>
+            </span>
           </Text>
-          <div className="flex gap-2 items-center mt-4 sm:w-auto w-full">
-            <Button onClick={() => window.open("mailto:hello@hackthe6ix.com")}>
-              <p>Email HT6</p>
-            </Button>
+          <Text
+            textType="paragraph-lg"
+            textColor="primary"
+            className="z-[100] mb-4 text-center"
+          >
+            <span className="text-[#00786D]">Event Location: YorkU</span>
+          </Text>
+
+          <div className="flex flex-row w-full h-[68vh] gap-8">
+            <div
+              className="flex gap-4 h-full flex-col"
+              style={{ width: profile.status.confirmed ? "70%" : "100%" }}
+            >
+              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[22%] rounded-xl py-4 px-6 flex flex-col items-start justify-center">
+                <Text
+                  textType="heading-sm"
+                  textColor="primary"
+                  textWeight="bold"
+                >
+                  {profile.status.confirmed ? (
+                    <span className="text-[#00AC6B]">
+                      Your Status: Attending
+                    </span>
+                  ) : (
+                    <span className="text-[#F32E26]">
+                      Your Status: Not Attending
+                    </span>
+                  )}
+                </Text>
+                <Text
+                  textType="paragraph-sm"
+                  textColor="secondary"
+                  className="mt-1 text-justify"
+                >
+                  {profile.status.confirmed ? (
+                    <>
+                      Glad you are joining us! Please ensure you go through our
+                      hacker guide book and bring the necessary items on the day
+                      of the hackathon. If you can no longer attend please let
+                      us know as early as possible.
+                    </>
+                  ) : (
+                    <>
+                      Sorry to see you go :( Your spot has been given to another
+                      exciting hacker. Hope to see you next year!
+                    </>
+                  )}
+                </Text>
+              </div>
+              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[40%] rounded-xl py-4 px-6 flex flex-col items-start  justify-center">
+                <Text
+                  textType="heading-sm"
+                  textColor="primary"
+                  textWeight="bold"
+                >
+                  Join Our Discord
+                </Text>
+                <Text
+                  textType="paragraph-sm"
+                  textColor="secondary"
+                  className="mt-1 mb-2 text-justify"
+                >
+                  Join the server to get the latest updates and connect with
+                  fellow hackers, mentors and sponsors!
+                </Text>
+                <div className="flex flex-row w-full gap-4">
+                  <FaDiscord className="text-[#8c9eff] text-[60px]" />
+                  <div className="flex flex-col items-start">
+                    <Text textType="paragraph-lg" textWeight="bold">
+                      <span className="text-[#8c9eff]">DISCORD -&gt;</span>
+                    </Text>
+                    <Text textType="paragraph-sm">
+                      Issue the following command in the #verification channel:
+                    </Text>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      "!verify youremail@gmail.com"
+                    );
+                  }}
+                  className="cursor-pointer hover:bg-[#54595950] flex text-[#00786D] flex-row gap-2 h-[40px] items-center justify-center rounded-4xl w-full bg-[#5459592E]"
+                >
+                  !verify youremail@gmail.com <Copy />
+                </button>
+              </div>
+              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[38%] rounded-xl py-4 px-6 flex flex-col items-start  justify-center">
+                <Text
+                  textType="heading-sm"
+                  textColor="primary"
+                  textWeight="bold"
+                >
+                  Useful Links
+                </Text>
+                <Text
+                  textType="paragraph-sm"
+                  textColor="secondary"
+                  className="mt-1 mb-2 text-justify"
+                >
+                  Explore these links to learn more about our event this year
+                  and get familiar with Hack the 6ix!
+                </Text>
+                <div className="flex flex-row gap-8 w-full justify-center mt-2 items-center">
+                  <a
+                    className="flex flex-row gap-2 items-center cursor-pointer"
+                    href="https://www.notion.so/hackthe6ix/Hack-the-6ix-2025-f03f9b3e42744b48a52c64a180159353"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src="/src/assets/notionlogo.png"
+                      className="h-[90px] w-[90px]"
+                    ></img>
+                    <div className="flex flex-col items-start w-[200px]">
+                      <Text
+                        textColor="black"
+                        textType="heading-sm"
+                        textWeight="bold"
+                        className="text-left"
+                      >
+                        NOTION -&gt;
+                      </Text>
+                      <Text textType="paragraph-sm" className="text-left">
+                        Access our live hacker guide book here!
+                      </Text>
+                    </div>
+                  </a>
+                  <a
+                    className="flex flex-row gap-2 items-center cursor-pointer"
+                    href="https://hackthe6ix2025.devpost.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src="/src/assets/devpostlogo.png"
+                      className="h-[90px] w-[90px]"
+                    ></img>
+                    <div className="flex flex-col items-start w-[200px]">
+                      <Text
+                        textColor="black"
+                        textType="heading-sm"
+                        textWeight="bold"
+                        className="text-left"
+                      >
+                        DEVPOST -&gt;
+                      </Text>
+                      <Text textType="paragraph-sm" className="text-left">
+                        Submit & share your projects here!
+                      </Text>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div
+              className="flex gap-4 h-full flex-col"
+              style={{
+                width: profile.status.confirmed ? "30%" : "0%",
+                display: profile.status.confirmed ? "flex" : "none",
+              }}
+            >
+              <button className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center">
+                <Text
+                  textType="paragraph-sm"
+                  textColor="white"
+                  className="cursor-pointer text-center"
+                  textWeight="bold"
+                >
+                  <span className="flex flex-row font-bold items-center justify-center gap-2">
+                    Hackathon Schedule <ArrowRight />
+                  </span>
+                </Text>
+              </button>
+              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] h-[60%] rounded-xl items-center justify-center py-4 px-6 ">
+                <Text
+                  textType="heading-sm"
+                  textColor="primary"
+                  textWeight="bold"
+                >
+                  Participant Code
+                </Text>
+                {error ? (
+                  <Text
+                    textType="paragraph-lg"
+                    textColor="primary"
+                    textWeight="bold"
+                  >
+                    <span className="font-bold text-red-500">
+                    {error}
+                    </span>
+                  </Text>
+                ) : (
+                  <img
+                    src={qr}
+                    alt="Your check-in QR code"
+                    className="my-2"
+                    style={{ width: 200, height: 200 }}
+                  />
+                )}
+                <Text
+                  textType="paragraph-sm"
+                  textColor="secondary"
+                  className="mt-1 mb-2 text-center"
+                >
+                  Show this QR code to check-in, grab food, participate in
+                  activities, etc! We recommend screenshotting this.
+                </Text>
+                <Text
+                  textType="paragraph-sm"
+                  textColor="primary"
+                  textWeight="bold"
+                  className="mt-1 mb-2 text-center"
+                >
+                  <span className="font-bold">Status: </span>
+                  {profile.status.checkedIn ? (
+                    <span className="text-[#00AC6B] ml-2 bg-[#dbfff2] px-2 py-1 rounded-full">
+                      Checked-in
+                    </span>
+                  ) : (
+                    <span className="text-[#F32E26] ml-2 bg-[#FEF2F2] px-2 py-1 rounded-full">
+                      Not Checked-in
+                    </span>
+                  )}
+                </Text>
+              </div>
+              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[40%] rounded-xl py-4 px-6 flex flex-col justify-center ">
+                <Text
+                  textType="paragraph-lg"
+                  textColor="primary"
+                  className="mb-2"
+                >
+                  <span className="font-bold">If you can no longer attend</span>
+                </Text>
+                <Text
+                  textType="paragraph-sm"
+                  textColor="secondary"
+                  className="text-center mb-4"
+                >
+                  If you can no longer attend, please let us know so we can pass
+                  this opportunity to a waitlisted hacker.
+                </Text>
+                <button
+                  onClick={() => setModalType("deny")}
+                  className="w-full hover:bg-[#f5cecb] rounded-lg border-1 border-[#E42027] bg-white px-4 py-2"
+                >
+                  <Text textType="paragraph-sm">
+                    <span className="font-bold text-[#E42027]">
+                      I can no longer attend
+                    </span>
+                  </Text>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
-
-      {profile?.status.accepted === true &&
-        !profile?.status.confirmed &&
-        !profile?.status.declined && (
-          <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
-            <Text
-              textType="heading-md"
-              textColor="primary"
-              className="z-[100] mb-8 text-center"
-            >
-              Welcome back,{" "}
-              {profile?.firstName && profile?.lastName ? (
-                <span>
-                  {profile?.firstName} {profile?.lastName}
-                </span>
-              ) : (
-                <span>hacker</span>
-              )}
-              !
-            </Text>
-            <Text textType="heading-lg" textColor="secondary">
-              Congratulations, you've been{" "}
-              <span className="text-[#009D60]">accepted</span>
-            </Text>
-            <Text
-              textType="paragraph-lg"
-              textColor="primary"
-              className="text-center mt-6"
-            >
-              Welcome to Hack the 6ix 2025! We are excited to offer you the
-              opportunity to hack with us.
-            </Text>
-            <Text
-              textType="paragraph-lg"
-              textColor="secondary"
-              className="!font-semibold mt-4"
-            >
-              To confirm your attendance, please RSVP below by{" "}
-              <span className="text-[#EE721D]">July 8</span>.
-            </Text>
-            <div className="flex sm:flex-row flex-col gap-2 items-center mt-8 w-full justify-center">
-              <Button onClick={() => setModalType("deny")} variant="back">
-                I can no longer attend
-              </Button>
-              <Button onClick={() => setModalType("accept")}>
-                Accept Invitation
-              </Button>
-            </div>
-          </div>
-        )}
 
       <Modal open={modalType === "deny"} onClose={() => setModalType(null)}>
         <Text
@@ -245,262 +464,6 @@ export default function Home() {
           </Button>
         </div>
       </Modal>
-      <Modal open={modalType === "accept"} onClose={() => setModalType(null)}>
-        <Text
-          textType="heading-md"
-          className="font-bold text-[32px] !text-[#EE721D] mb-4"
-        >
-          Accept Invitation?
-        </Text>
-        <Text
-          textType="paragraph-lg"
-          textColor="primary"
-          className="mb-6 font-medium leading-snug"
-        >
-          Please fill out the form below to confirm your attendance and secure
-          your spot at Hack the 6ix 2025.
-        </Text>
-        <RSVPForm
-          onSubmit={handleAcceptFormSubmit}
-          onCancel={() => setModalType(null)}
-          loading={loading}
-        />
-      </Modal>
-      {/* profile?.status.waitlisted ===  */}
-      {profile?.status.waitlisted === true && (
-        <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
-          <Text
-            textType="heading-md"
-            textColor="primary"
-            className="z-[100] mb-8 text-center"
-          >
-            Welcome back,{" "}
-            {profile?.firstName && profile?.lastName ? (
-              <span>
-                {profile?.firstName} {profile?.lastName}
-              </span>
-            ) : (
-              <span>hacker</span>
-            )}
-            !
-          </Text>
-          <Text textType="heading-lg" textColor="secondary">
-            You have been placed on the{" "}
-            <span className="text-[#EE721D]">waitlist</span>
-          </Text>
-          <Text
-            textType="paragraph-lg"
-            textColor="primary"
-            className="text-center mt-6"
-          >
-            We received an overwhelming amount of applications this year and
-            have placed you on the waitlist. We'll let you know if a spot opens
-            up, so make sure to check your inbox!
-          </Text>
-          <Text
-            textType="paragraph-lg"
-            textColor="secondary"
-            className="!font-semibold mt-8"
-          ></Text>
-        </div>
-      )}
-
-      {profile?.status.rejected === true && (
-        <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
-          <Text
-            textType="heading-md"
-            textColor="primary"
-            className="z-[100] mb-8 text-center"
-          >
-            Welcome back,{" "}
-            {profile?.firstName && profile?.lastName ? (
-              <span>
-                {profile?.firstName} {profile?.lastName}
-              </span>
-            ) : (
-              <span>hacker</span>
-            )}
-            !
-          </Text>
-          <Text textType="heading-lg" textColor="secondary">
-            Unfortunately, your hacker application has{" "}
-            <span className="text-[#E42027]">not been selected</span> :(
-          </Text>
-          <Text
-            textType="paragraph-lg"
-            textColor="primary"
-            className="text-center mt-6"
-          >
-            Thank you for your enthusiasm and dedication in applying to Hack the
-            6ix 2025. We received an overwhelming amount of applications this
-            year, and after careful consideration, we regret to inform you that
-            your application was not chosen for this year's hackathon.
-          </Text>
-          <Text
-            textType="paragraph-lg"
-            textColor="secondary"
-            className="!font-semibold mt-4"
-          >
-            Interested in volunteering? Sign ups close on July 7th
-          </Text>
-          <div className="flex gap-2 items-center mt-4 sm:w-auto w-full">
-            <Button
-              onClick={() =>
-                window.open("https://go.hackthe6ix.com/ktD2kt", "_blank")
-              }
-            >
-              <p>Volunteer at HT6</p>
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {profile?.status.applied === false && (
-        <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
-          <Text
-            textType="heading-md"
-            textColor="primary"
-            className="z-[100] mb-8 text-center"
-          >
-            Welcome back,{" "}
-            {profile?.firstName && profile?.lastName ? (
-              <span>
-                {profile?.firstName} {profile?.lastName}
-              </span>
-            ) : (
-              <span>hacker</span>
-            )}
-            !
-          </Text>
-          <Text textType="heading-lg" textColor="secondary">
-            You did <span className="text-[#E42027]">not </span>submit an
-            application to Hack the 6ix this year.
-          </Text>
-          <Text
-            textType="paragraph-lg"
-            textColor="primary"
-            className="text-center mt-6"
-          >
-            We look forward to welcoming you to a future event!
-          </Text>
-          <Text
-            textType="paragraph-lg"
-            textColor="secondary"
-            className="!font-semibold mt-4"
-          >
-            Have a question? Feel free to reach out to us!
-          </Text>
-          <div className="flex gap-2 items-center mt-4">
-            <button
-              className="bg-transparent text-[#00887E] transition-opacity border border-[#00887E] cursor-pointer hover:opacity-75 rounded-[8px] px-[24px] py-[12px] font-bold"
-              onClick={() => window.open("mailto:hello@hackthe6ix.com")}
-            >
-              <p>Email HT6</p>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {profile?.status.declined && (
-        <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
-          <Text
-            textType="heading-md"
-            textColor="primary"
-            className="z-[100] mb-8 text-center"
-          >
-            Bye,{" "}
-            {profile?.firstName && profile?.lastName ? (
-              <span>
-                {profile?.firstName} {profile?.lastName}
-              </span>
-            ) : (
-              <span>hacker</span>
-            )}
-            !
-          </Text>
-          <Text textType="heading-lg" textColor="secondary">
-            We're sad to see you go!
-          </Text>
-          <Text
-            textType="paragraph-lg"
-            textColor="primary"
-            className="text-center mt-6"
-          >
-            Thank you for letting us know you will{" "}
-            <span className="text-[#EE721D]">no longer be attending</span> Hack
-            The 6ix 2025. We hope to see you next year!
-          </Text>
-
-          <div className="w-full sm:w-[60%] h-[1px] bg-[#08566B] my-6"></div>
-        </div>
-      )}
-      <Text
-        textType="paragraph-lg"
-        textColor="secondary"
-        className="!font-semibold mt-8"
-      >
-        Let's stay connected:
-      </Text>
-
-      <div className="flex flex-row gap-6 items-center mt-4 text-[#08566B] text-[20px] sm:text-[30px]">
-        <Link
-          to="https://www.facebook.com/Hackthe6ix/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Hack the 6ix on Facebook"
-        >
-          <FaFacebook />
-        </Link>
-        <Link
-          to="https://www.instagram.com/hackthe6ix/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Hack the 6ix on Instagram"
-        >
-          <FaInstagram />
-        </Link>
-        <Link
-          to="https://www.linkedin.com/company/hackthe6ixofficial/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Hack the 6ix on Linkedin"
-        >
-          <FaLinkedin />
-        </Link>
-        <Link
-          to="https://x.com/hackthe6ix/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Hack the 6ix on Twitter"
-        >
-          <FaTwitter />
-        </Link>
-      </div>
-
-      {profile &&
-        !profile.status.accepted &&
-        !profile.status.rejected &&
-        !profile.status.waitlisted && (
-          <div className="flex flex-col items-center justify-center z-10 w-full max-w-[850px] mx-auto px-4">
-            <Text textType="heading-lg" textColor="secondary" className="mb-4">
-              You shouldn't be here!
-            </Text>
-            <Text
-              textType="paragraph-lg"
-              textColor="primary"
-              className="text-center"
-            >
-              If you think this is a mistake, please contact us at{" "}
-              <a
-                href="mailto:hello@hackthe6ix.com"
-                className="underline text-[#00887E]"
-              >
-                hello@hackthe6ix.com
-              </a>
-              .
-            </Text>
-          </div>
-        )}
     </div>
   );
 }
