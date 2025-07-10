@@ -14,10 +14,15 @@ const isAndroid = () => {
   return /Android/.test(navigator.userAgent);
 };
 
+const baseUrl = import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com";
+
 const downloadIOSPass = async (userId: string, userType: string) => {
   try {
-    const response = await fetch(`http://localhost:3000/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}`, { 
-      method: 'GET' 
+    const response = await fetch(`${baseUrl}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}`, { 
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
     });
     
     if (!response.ok) {
@@ -40,8 +45,11 @@ const downloadIOSPass = async (userId: string, userType: string) => {
 
 const downloadAndroidPass = async (userId: string, userType: string) => {
   try {
-    const response = await fetch(`http://localhost:3000/passes/android/hackathon.pkpass?userId=${userId}&userType=${userType}`, { 
-      method: 'GET' 
+    const response = await fetch(`${baseUrl}/passes/android/hackathon.pkpass?userId=${userId}&userType=${userType}`, { 
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
     });
     
     if (!response.ok) {

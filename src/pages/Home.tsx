@@ -11,7 +11,7 @@ import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
 import Modal from "../components/Modal/Modal";
 import { updateRSVP } from "../api/client";
-import { getCheckinQR } from "../api/client";
+import { getDownloadPassQR } from "../api/client";
 import Button from "../components/Button/Button";
 import type { Profile } from "../components/types";
 
@@ -23,7 +23,9 @@ async function addToWalletApple(profile: Profile) {
   const userId = profile._id;
   const userType = "User";
   try {
-    const res = await fetch(`http://localhost:3000/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}`, { method: 'GET' });
+    const res = await fetch(`${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}`, { method: 'GET', headers: {
+      'ngrok-skip-browser-warning': 'true'
+    } });
     if (!res.ok) {
       console.error("Failed to fetch pass");
       console.log(res);
@@ -43,6 +45,14 @@ async function addToWalletApple(profile: Profile) {
   }
 }
 
+const isIOS = () => {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+};
+
+const isAndroid = () => {
+  return /Android/.test(navigator.userAgent);
+};
+
 export default function Home() {
   const { profile, setProfile } = useAuth();
   const GRASSCOUNT = 40;
@@ -50,21 +60,23 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [qr, setQr] = useState("");
+  const [downloadPassQR, setDownloadPassQR] = useState("");
+  const [downloadPassError, setDownloadPassError] = useState("");
 
+
+  // Load download pass QR code when profile is available
   useEffect(() => {
-    setLoading(true);
-    getCheckinQR()
-      .then((dataUri) => {
-        setQr(dataUri);
-      })
-      .catch((err: any) => {
-        console.error(err);
-        setError("Failed to load QR code");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+    if (profile?._id) {
+      getDownloadPassQR(profile._id, "User")
+        .then((dataUri) => {
+          setDownloadPassQR(dataUri);
+        })
+        .catch((err: any) => {
+          console.error(err);
+          setDownloadPassError("Failed to load download pass QR code");
+        });
+    }
+  }, [profile?._id]);
 
   // TEMPORARY TO FORCE CONFIRMED STATUS
   useEffect(() => {
@@ -385,13 +397,13 @@ export default function Home() {
                   </span>
                 </Text>
               </button>
-              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] h-[60%] rounded-xl items-center justify-center py-4 px-6 ">
+              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] h-fit rounded-xl items-center justify-center py-4 px-6 ">
                 <Text
                   textType="heading-sm"
                   textColor="primary"
                   textWeight="bold"
                 >
-                  Participant Code
+                  Download Pass
                 </Text>
                 {error ? (
                   <Text
@@ -405,13 +417,13 @@ export default function Home() {
                   </Text>
                 ) : (
                   <img
-                    src={qr}
-                    alt="Your check-in QR code"
+                    src={downloadPassQR}
+                    alt="Your download pass QR code"
                     className="my-2"
-                    style={{ width: 200, height: 200 }}
+                    style={{ width: 160, height: 160 }}
                   />
                 )}
-                <div className="flex flex-col gap-2 w-1/2">
+                {isIOS() && (
                   <img src={appleWallet} alt="Add to Apple Wallet" className="w-full h-full cursor-pointer"
                     onClick={async () => {
                       if (!profile) {
@@ -421,20 +433,27 @@ export default function Home() {
                       addToWalletApple(profile);
                     }}
                   />
+                )}
+                {isAndroid() && (
                   <img src={appleWallet} alt="Add to Google Wallet" className="w-full h-full cursor-pointer"
                     onClick={() => {
                       navigator.clipboard.writeText(qr);
                     }}
                   />
-                </div>
-                <Text
+                )}
+               {downloadPassError ? <Text
                   textType="paragraph-sm"
                   textColor="secondary"
-                  className="mt-1 mb-2 text-center"
+                  className="mt-2 text-center"
                 >
-                  Show this QR code to check-in, grab food, participate in
-                  activities, etc! We recommend screenshotting this.
-                </Text>
+                  {downloadPassError}
+                </Text> : <Text
+                  textType="paragraph-sm"
+                  textColor="secondary"
+                  className="mt-2 text-center"
+                >
+                  Scan this QR code on mobile to download your event pass
+                </Text>}
                 <Text
                   textType="paragraph-sm"
                   textColor="primary"

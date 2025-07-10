@@ -62,3 +62,14 @@ export async function getCheckinQR(): Promise<string> {
   );
   return message;
 }
+
+export async function getDownloadPassQR(userId: string, userType: string = "User"): Promise<any> {
+  const res = await fetch(
+    `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/api/action/downloadPassQR?userId=${userId}&userType=${userType}`,
+    { method: "GET", headers: {
+      'ngrok-skip-browser-warning': 'true'
+    } }
+  );
+  const data = await res.json();
+  return data.message;
+}
