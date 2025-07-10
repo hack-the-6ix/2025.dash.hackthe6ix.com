@@ -6,6 +6,7 @@ import cloudMiddle from "../assets/cloudMiddle.svg";
 import firefly from "../assets/firefly.svg";
 import Text from "../components/Text/Text";
 import appleWallet from "../assets/apple-add-to-wallet.svg";
+import googleWallet from "../assets/google-add-to-wallet.svg";
 import { Copy } from "lucide-react";
 import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
@@ -18,6 +19,21 @@ import type { Profile } from "../components/types";
 import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { checkAuth } from "../auth/middleware";
+
+async function addToWalletGoogle(profile: Profile) {
+  const userId = profile._id;
+  const userType = "User";
+  try {
+    const res = await fetch(`${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/google/hackathon.pkpass?userId=${userId}&userType=${userType}`, { method: 'GET', headers: {
+      'ngrok-skip-browser-warning': 'true'
+    } });
+    const data = await res.json();
+    console.log(data);
+    window.open(data.saveUrl, '_blank');
+  } catch (err) {
+    console.error('Failed to fetch pass:', err);
+  }
+}
 
 async function addToWalletApple(profile: Profile) {
   const userId = profile._id;
@@ -424,7 +440,7 @@ export default function Home() {
                   />
                 )}
                 {isIOS() && (
-                  <img src={appleWallet} alt="Add to Apple Wallet" className="w-full h-full cursor-pointer"
+                  <img src={appleWallet} alt="Add to Apple Wallet" className="w-4/5 h-full cursor-pointer"
                     onClick={async () => {
                       if (!profile) {
                         console.error("No profile found");
@@ -434,13 +450,15 @@ export default function Home() {
                     }}
                   />
                 )}
-                {isAndroid() && (
-                  <img src={appleWallet} alt="Add to Google Wallet" className="w-full h-full cursor-pointer"
-                    onClick={() => {
-                      navigator.clipboard.writeText(qr);
+                <img src={googleWallet} alt="Add to Google Wallet" className="w-4/5 h-full cursor-pointer"
+                    onClick={async () => {
+                      if (!profile) {
+                        console.error("No profile found");
+                        return;
+                      }
+                      addToWalletGoogle(profile);
                     }}
                   />
-                )}
                {downloadPassError ? <Text
                   textType="paragraph-sm"
                   textColor="secondary"
