@@ -102,11 +102,11 @@ export default function Home() {
   }, [profile?._id]);
 
   // TEMPORARY TO FORCE CONFIRMED STATUS
-  useEffect(() => {
-    if (profile && !profile.status.confirmed) {
-      profile.status.confirmed = true;
-    }
-  }, [profile]);
+  // useEffect(() => {
+  //   if (profile && !profile.status.confirmed) {
+  //     profile.status.confirmed = true;
+  //   }
+  // }, [profile]);
 
   const handleRSVP = async (
     attending: boolean,
