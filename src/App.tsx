@@ -9,6 +9,7 @@ import Callback from "./pages/Callback";
 import Modal from "./components/Modal/Modal";
 import Text from "./components/Text/Text";
 import Button from "./components/Button/Button";
+import Schedule from "./pages/Schedule";
 
 function AppContent() {
   const { setProfile } = useAuth();
@@ -67,6 +68,7 @@ function AppContent() {
   return (
     <>
       <Routes>
+        <Route path="/schedule" element={<Schedule />} />
         <Route path="/" element={<Home />} />
         <Route path="/callback" element={<Callback />} />
         <Route path="/download-pass" element={<DownloadPass />} />

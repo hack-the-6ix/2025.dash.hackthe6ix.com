@@ -408,7 +408,7 @@ export default function Home() {
                 display: profile.status.confirmed ? "flex" : "none",
               }}
             >
-              <button className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center">
+              <a href="/schedule" className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center">
                 <Text
                   textType="paragraph-sm"
                   textColor="white"
@@ -419,8 +419,8 @@ export default function Home() {
                     Hackathon Schedule <ArrowRight />
                   </span>
                 </Text>
-              </button>
-              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] h-fit rounded-xl items-center justify-center py-4 px-6 ">
+              </a>
+              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] h-[60%] rounded-xl items-center justify-center py-4 px-6 ">
                 <Text
                   textType="heading-sm"
                   textColor="primary"
@@ -443,7 +443,7 @@ export default function Home() {
                     src={downloadPassQR}
                     alt="Your download pass QR code"
                     className="my-2"
-                    style={{ width: 160, height: 160 }}
+                    style={{ width: 100, height: 100 }}
                   />
                 )}
                 {isIOS() && (
@@ -530,35 +530,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      <Modal open={modalType === "deny"} onClose={() => setModalType(null)}>
-        <Text
-          textType="heading-md"
-          className="font-bold text-[32px] !text-[#EE721D] mb-4"
-        >
-          Can no longer attend HT6?
-        </Text>
-        <Text
-          textType="paragraph-lg"
-          textColor="primary"
-          className="mb-6 font-medium leading-snug"
-        >
-          This opportunity will be passed onto a waitlisted participant. This
-          action cannot be undone.
-        </Text>
-        <div className="flex sm:flex-row flex-col gap-4 justify-center mt-2">
-          <Button onClick={() => handleRSVP(false)} disabled={loading}>
-            {loading ? "Submitting..." : "I can no longer attend"}
-          </Button>
-          <Button
-            variant="back"
-            onClick={() => setModalType(null)}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-        </div>
-      </Modal>
     </div>
   );
 }
