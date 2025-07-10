@@ -10,15 +10,11 @@ import googleWallet from "../assets/google-add-to-wallet.svg";
 import { Copy } from "lucide-react";
 import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
-import Modal from "../components/Modal/Modal";
-import { updateRSVP } from "../api/client";
 import { getDownloadPassQR } from "../api/client";
-import Button from "../components/Button/Button";
 import type { Profile } from "../components/types";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { checkAuth } from "../auth/middleware";
 
 async function addToWalletGoogle(profile: Profile) {
   const userId = profile._id;
@@ -67,17 +63,9 @@ const isIOS = () => {
   return /iPad|iPhone|iPod/.test(navigator.userAgent);
 };
 
-const isAndroid = () => {
-  return /Android/.test(navigator.userAgent);
-};
-
 export default function Home() {
-  const { profile, setProfile } = useAuth();
+  const { profile } = useAuth();
   const GRASSCOUNT = 40;
-  const [modalType, setModalType] = useState<null | "deny" | "accept">(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [qr, setQr] = useState("");
   const [downloadPassQR, setDownloadPassQR] = useState("");
   const [downloadPassError, setDownloadPassError] = useState("");
 
@@ -107,62 +95,6 @@ export default function Home() {
   //     profile.status.confirmed = true;
   //   }
   // }, [profile]);
-
-  const handleRSVP = async (
-    attending: boolean,
-    formData?: { age: number; waiverAgreed: boolean }
-  ) => {
-    setLoading(true);
-    try {
-      if (attending && formData) {
-        await updateRSVP({
-          rsvp: {
-            attending: true,
-            form: formData,
-          },
-        });
-      } else {
-        await updateRSVP({
-          rsvp: {
-            attending: false,
-            form: { age: 0, waiverAgreed: false },
-          },
-        });
-      }
-      setModalType(null);
-      const result = await checkAuth();
-      if (!result.error) {
-        setProfile(result.profile);
-      } else if (result.error.type === "auth_failed") {
-        // For API errors, just log and continue - don't disrupt user flow
-        console.log("Profile refresh failed after RSVP:", result.error.message);
-        // Keep current profile state rather than clearing it
-      }
-    } catch (error: unknown) {
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "status" in error &&
-        "message" in error &&
-        (error as { status?: number; message?: string }).status === 403 &&
-        (error as { status?: number; message?: string }).message ===
-          "You are not eligible to RSVP!"
-      ) {
-        alert(
-          "You are not eligible to RSVP. Please check your status or contact support if you believe this is a mistake."
-        );
-      } else {
-        console.error("RSVP error:", error);
-        alert("Failed to update RSVP. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    console.log("hi", profile);
-  }, []);
 
   return (
     <div className="flex sm:gap-0 gap-4 overflow-hidden p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] h-[100vh] w-full flex-col justify-center items-center text-center overflow-x-hidden">
@@ -428,14 +360,14 @@ export default function Home() {
                 >
                   Download Pass
                 </Text>
-                {error ? (
+                {downloadPassError ? (
                   <Text
                     textType="paragraph-lg"
                     textColor="primary"
                     textWeight="bold"
                   >
                     <span className="font-bold text-red-500">
-                    {error}
+                    {downloadPassError}
                     </span>
                   </Text>
                 ) : (
@@ -468,13 +400,7 @@ export default function Home() {
                       }}
                     />
                 )}
-               {downloadPassError ? <Text
-                  textType="paragraph-sm"
-                  textColor="secondary"
-                  className="mt-2 text-center"
-                >
-                  {downloadPassError}
-                </Text> : <Text
+               {(!downloadPassError) && <Text
                   textType="paragraph-sm"
                   textColor="secondary"
                   className="mt-2 text-center"
@@ -516,7 +442,6 @@ export default function Home() {
                   this opportunity to a waitlisted hacker.
                 </Text>
                 <button
-                  onClick={() => setModalType("deny")}
                   className="w-full hover:bg-[#f5cecb] rounded-lg border-1 border-[#E42027] bg-white px-4 py-2"
                 >
                   <Text textType="paragraph-sm">
