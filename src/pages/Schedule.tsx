@@ -5,25 +5,20 @@ import cloudPhoneSVG from "../assets/cloudsPhone.svg";
 import cloudMiddle from "../assets/cloudMiddle.svg";
 import firefly from "../assets/firefly.svg";
 import Text from "../components/Text/Text";
-import { Copy } from "lucide-react";
-import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
-import { updateRSVP } from "../api/client";
-import { getCheckinQR } from "../api/client";
-import Button from "../components/Button/Button";
-
 import { useAuth } from "../contexts/AuthContext";
-import { useEffect, useState } from "react";
-import { checkAuth } from "../auth/middleware";
+import EventsList from "../components/Schedule/Schedule";
 
 export default function Schedule() {
-  const { profile, setProfile } = useAuth();
+  const { profile } = useAuth();
   const GRASSCOUNT = 40;
   const legendItems = [
-    { color: "#680088", label: "Main Events" },
-    { color: "#0A7837", label: "Sponsor bay" },
-    { color: "#EE721E", label: "Socials" },
+    { color: "#445EBA", label: "Announcements" },
+    { color: "#680088", label: "Events" },
+    { color: "#0A7837", label: "Ceremonies" },
     { color: "#E42027", label: "Workshops" },
+    { color: "#0dc6de", label: "Activities" },
+    { color: "#edc009", label: "Food" },
   ];
 
   return (
@@ -96,7 +91,9 @@ export default function Schedule() {
 
           <div className="h-full flex flex-row w-full gap-8">
             <div className="flex gap-4 flex-col w-[75%]">
-              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[70vh] rounded-xl py-4 px-6 flex flex-col items-start justify-center"></div>
+              <div className="overflow-scroll w-full backdrop-blur-sm bg-[#FFFFFF80] h-[70vh] rounded-xl py-4 px-6 flex flex-col items-start justify-start">
+                <EventsList />
+              </div>
             </div>
             <div className="flex gap-4 h-full flex-col w-[25%]">
               <a
