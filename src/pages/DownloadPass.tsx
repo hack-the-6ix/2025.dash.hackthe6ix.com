@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import type { PassUserInformation } from "../components/types";
 
 const isMobile = () => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -10,15 +11,12 @@ const isIOS = () => {
   return /iPad|iPhone|iPod/.test(navigator.userAgent);
 };
 
-const isAndroid = () => {
-  return /Android/.test(navigator.userAgent);
-};
-
 const baseUrl = import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com";
 
-const downloadIOSPass = async (userId: string, userType: string) => {
+const downloadIOSPass = async (user: PassUserInformation) => {
+  const { userId, userType, userName } = user;
   try {
-    const response = await fetch(`${baseUrl}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}`, { 
+    const response = await fetch(`${baseUrl}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`, { 
       method: 'GET',
       headers: {
         'ngrok-skip-browser-warning': 'true'
@@ -43,9 +41,10 @@ const downloadIOSPass = async (userId: string, userType: string) => {
   }
 };
 
-const downloadAndroidPass = async (userId: string, userType: string) => {
+const downloadGooglePass = async (user: PassUserInformation) => {
+  const { userId, userType, userName } = user;
   try {
-    const response = await fetch(`${baseUrl}/passes/android/hackathon.pkpass?userId=${userId}&userType=${userType}`, { 
+    const response = await fetch(`${baseUrl}/passes/google/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`, { 
       method: 'GET',
       headers: {
         'ngrok-skip-browser-warning': 'true'
@@ -76,7 +75,7 @@ const downloadAndroidPass = async (userId: string, userType: string) => {
 export default function DownloadPass() {
   const navigate = useNavigate();
 
-  const {userId, userType} = useParams();
+  const {userId, userType, userName} = useParams();
 
   useEffect(() => {
     const handleDeviceDetection = async () => {
@@ -86,15 +85,24 @@ export default function DownloadPass() {
         navigate('/');
         return;
       }
+      
+      if (!userId) {
+        navigate('/');
+        console.error("No userId");
+        return;
+      }
+
+      const user = {
+        userId: userId,
+        userType: userType || 'User',
+        userName: userName || ''
+      }
 
       try {
         if (isIOS()) {
-          await downloadIOSPass(userId || '', userType || '');
-        } else if (isAndroid()) {
-          await downloadAndroidPass(userId || '', userType || '');
+          await downloadIOSPass(user);
         } else {
-          console.log('Unsupported mobile platform');
-          navigate('/');
+          await downloadGooglePass(user);
         }
       } catch (error) {
         console.error('Error downloading pass:', error);

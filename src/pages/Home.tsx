@@ -23,8 +23,9 @@ import { checkAuth } from "../auth/middleware";
 async function addToWalletGoogle(profile: Profile) {
   const userId = profile._id;
   const userType = "User";
+  const userName = `${profile.firstName} ${profile.lastName}`;
   try {
-    const res = await fetch(`${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/google/hackathon.pkpass?userId=${userId}&userType=${userType}`, { method: 'GET', headers: {
+    const res = await fetch(`${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/google/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`, { method: 'GET', headers: {
       'ngrok-skip-browser-warning': 'true'
     } });
     const data = await res.json();
@@ -38,8 +39,9 @@ async function addToWalletGoogle(profile: Profile) {
 async function addToWalletApple(profile: Profile) {
   const userId = profile._id;
   const userType = "User";
+  const userName = `${profile.firstName} ${profile.lastName}`;
   try {
-    const res = await fetch(`${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}`, { method: 'GET', headers: {
+    const res = await fetch(`${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`, { method: 'GET', headers: {
       'ngrok-skip-browser-warning': 'true'
     } });
     if (!res.ok) {
@@ -83,7 +85,12 @@ export default function Home() {
   // Load download pass QR code when profile is available
   useEffect(() => {
     if (profile?._id) {
-      getDownloadPassQR(profile._id, "User")
+      const userName = `${profile.firstName} ${profile.lastName}`;
+      getDownloadPassQR({
+        userId: profile._id,
+        userType: "User",
+        userName: userName,
+      })
         .then((dataUri) => {
           setDownloadPassQR(dataUri);
         })
@@ -450,15 +457,17 @@ export default function Home() {
                     }}
                   />
                 )}
-                <img src={googleWallet} alt="Add to Google Wallet" className="w-4/5 h-full cursor-pointer"
-                    onClick={async () => {
-                      if (!profile) {
-                        console.error("No profile found");
-                        return;
-                      }
-                      addToWalletGoogle(profile);
-                    }}
-                  />
+                {!isIOS() && (
+                  <img src={googleWallet} alt="Add to Google Wallet" className="w-4/5 h-full cursor-pointer"
+                      onClick={async () => {
+                        if (!profile) {
+                          console.error("No profile found");
+                          return;
+                        }
+                        addToWalletGoogle(profile);
+                      }}
+                    />
+                )}
                {downloadPassError ? <Text
                   textType="paragraph-sm"
                   textColor="secondary"
