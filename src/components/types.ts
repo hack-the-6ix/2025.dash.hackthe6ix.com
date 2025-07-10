@@ -42,3 +42,9 @@ export interface Profile {
     checkedIn: boolean;
   };
 }
+
+export interface PassUserInformation {
+  userId: string;
+  userType: string;
+  userName: string;
+}

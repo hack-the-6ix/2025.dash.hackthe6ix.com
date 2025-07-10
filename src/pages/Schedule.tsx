@@ -5,19 +5,12 @@ import cloudPhoneSVG from "../assets/cloudsPhone.svg";
 import cloudMiddle from "../assets/cloudMiddle.svg";
 import firefly from "../assets/firefly.svg";
 import Text from "../components/Text/Text";
-import { Copy } from "lucide-react";
-import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
-import { updateRSVP } from "../api/client";
-import { getCheckinQR } from "../api/client";
-import Button from "../components/Button/Button";
 
 import { useAuth } from "../contexts/AuthContext";
-import { useEffect, useState } from "react";
-import { checkAuth } from "../auth/middleware";
 
 export default function Schedule() {
-  const { profile, setProfile } = useAuth();
+  const { profile } = useAuth();
   const GRASSCOUNT = 40;
   const legendItems = [
     { color: "#680088", label: "Main Events" },
