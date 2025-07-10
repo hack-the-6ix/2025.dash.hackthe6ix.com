@@ -435,35 +435,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      <Modal open={modalType === "deny"} onClose={() => setModalType(null)}>
-        <Text
-          textType="heading-md"
-          className="font-bold text-[32px] !text-[#EE721D] mb-4"
-        >
-          Can no longer attend HT6?
-        </Text>
-        <Text
-          textType="paragraph-lg"
-          textColor="primary"
-          className="mb-6 font-medium leading-snug"
-        >
-          This opportunity will be passed onto a waitlisted participant. This
-          action cannot be undone.
-        </Text>
-        <div className="flex sm:flex-row flex-col gap-4 justify-center mt-2">
-          <Button onClick={() => handleRSVP(false)} disabled={loading}>
-            {loading ? "Submitting..." : "I can no longer attend"}
-          </Button>
-          <Button
-            variant="back"
-            onClick={() => setModalType(null)}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-        </div>
-      </Modal>
     </div>
   );
 }
