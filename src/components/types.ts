@@ -19,9 +19,16 @@ export interface AuthResponse {
 }
 
 export interface Profile {
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
+  roles: {
+    hacker: boolean;
+    admin: boolean;
+    organizer: boolean;
+    volunteer: boolean;
+  }
   status: {
     accepted: boolean;
     textStatus: string;
@@ -32,5 +39,6 @@ export interface Profile {
     applicationExpired: boolean;
     canRSVP: boolean;
     waitlisted: boolean;
+    checkedIn: boolean;
   };
 }
