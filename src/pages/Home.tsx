@@ -340,7 +340,7 @@ export default function Home() {
                 display: profile.status.confirmed ? "flex" : "none",
               }}
             >
-              <button className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center">
+              <a href="/schedule" className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center">
                 <Text
                   textType="paragraph-sm"
                   textColor="white"
@@ -351,7 +351,7 @@ export default function Home() {
                     Hackathon Schedule <ArrowRight />
                   </span>
                 </Text>
-              </button>
+              </a>
               <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] h-[60%] rounded-xl items-center justify-center py-4 px-6 ">
                 <Text
                   textType="heading-sm"
@@ -375,7 +375,7 @@ export default function Home() {
                     src={qr}
                     alt="Your check-in QR code"
                     className="my-2"
-                    style={{ width: 200, height: 200 }}
+                    style={{ width: 100, height: 100 }}
                   />
                 )}
                 <Text
