@@ -5,6 +5,7 @@ import cloudPhoneSVG from "../assets/cloudsPhone.svg";
 import cloudMiddle from "../assets/cloudMiddle.svg";
 import firefly from "../assets/firefly.svg";
 import Text from "../components/Text/Text";
+import appleWallet from "../assets/apple-add-to-wallet.svg";
 import { Copy } from "lucide-react";
 import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
@@ -12,10 +13,35 @@ import Modal from "../components/Modal/Modal";
 import { updateRSVP } from "../api/client";
 import { getCheckinQR } from "../api/client";
 import Button from "../components/Button/Button";
+import type { Profile } from "../components/types";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { checkAuth } from "../auth/middleware";
+
+async function addToWalletApple(profile: Profile) {
+  const userId = profile._id;
+  const userType = "User";
+  try {
+    const res = await fetch(`http://localhost:3000/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}`, { method: 'GET' });
+    if (!res.ok) {
+      console.error("Failed to fetch pass");
+      console.log(res);
+      return;
+    }
+    const blob = await res.blob();
+
+    const url = window.URL.createObjectURL(new Blob([blob], {
+      type: 'application/vnd.apple.pkpass'
+    }));
+    window.location.href = url;
+
+    // kill after some time
+    setTimeout(() => window.URL.revokeObjectURL(url), 5000);
+  } catch (err) {
+    console.error('Failed to fetch pass:', err);
+  }
+}
 
 export default function Home() {
   const { profile, setProfile } = useAuth();
@@ -39,6 +65,13 @@ export default function Home() {
         setLoading(false);
       });
   }, []);
+
+  // TEMPORARY TO FORCE CONFIRMED STATUS
+  useEffect(() => {
+    if (profile && !profile.status.confirmed) {
+      profile.status.confirmed = true;
+    }
+  }, [profile]);
 
   const handleRSVP = async (
     attending: boolean,
@@ -97,7 +130,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="sm:gap-0 gap-4 overflow-hidden p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] h-[100vh] w-full flex flex-col justify-center items-center text-center overflow-x-hidden">
+    <div className="flex sm:gap-0 gap-4 overflow-hidden p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] h-[100vh] w-full flex-col justify-center items-center text-center overflow-x-hidden">
       <img
         src={cloudSVG}
         alt="Cloud"
@@ -378,6 +411,22 @@ export default function Home() {
                     style={{ width: 200, height: 200 }}
                   />
                 )}
+                <div className="flex flex-col gap-2 w-1/2">
+                  <img src={appleWallet} alt="Add to Apple Wallet" className="w-full h-full cursor-pointer"
+                    onClick={async () => {
+                      if (!profile) {
+                        console.error("No profile found");
+                        return;
+                      }
+                      addToWalletApple(profile);
+                    }}
+                  />
+                  <img src={appleWallet} alt="Add to Google Wallet" className="w-full h-full cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(qr);
+                    }}
+                  />
+                </div>
                 <Text
                   textType="paragraph-sm"
                   textColor="secondary"
