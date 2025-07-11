@@ -4,10 +4,10 @@ import cloudSVG from "../assets/cloudsLaptop.svg";
 import cloudPhoneSVG from "../assets/cloudsPhone.svg";
 import cloudMiddle from "../assets/cloudMiddle.svg";
 import firefly from "../assets/firefly.svg";
-import Text from "../components/Text/Text";
+import Text from "../../components/Text/Text";
 import { ArrowRight } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import EventsList from "../components/Schedule/Schedule";
+import { useAuth } from "../../contexts/AuthContext";
+import EventsList from "../../components/Schedule/Schedule";
 
 export default function Schedule() {
   const { profile } = useAuth();

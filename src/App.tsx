@@ -1,15 +1,15 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home/Home";
-import DownloadPass from "./pages/DownloadPass";
+import DownloadPass from "./pages/DownloadPass/DownloadPass";
 import { AuthProvider } from "./contexts/AuthContext";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { checkAuth, type AuthResult } from "./auth/middleware";
 import { useAuth } from "./contexts/AuthContext";
-import Callback from "./pages/Callback";
+import Callback from "./pages/Callback/Callback";
 import Modal from "./components/Modal/Modal";
 import Text from "./components/Text/Text";
 import Button from "./components/Button/Button";
-import Schedule from "./pages/Schedule";
+import Schedule from "./pages/Schedule/Schedule";
 import DiscordCallback from "./pages/Discord/Callback";
 import DiscordLink from "./pages/Discord/Link";
 
