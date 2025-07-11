@@ -10,6 +10,8 @@ import Modal from "./components/Modal/Modal";
 import Text from "./components/Text/Text";
 import Button from "./components/Button/Button";
 import Schedule from "./pages/Schedule";
+import DiscordCallback from "./pages/Discord/Callback";
+import DiscordLink from "./pages/Discord/Link";
 
 function AppContent() {
   const { setProfile } = useAuth();
@@ -72,6 +74,10 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/callback" element={<Callback />} />
         <Route path="/download-pass" element={<DownloadPass />} />
+        <Route path="/discord">
+          <Route path="callback" element={<DiscordCallback />} />
+          <Route path="link" element={<DiscordLink />} />
+        </Route>
       </Routes>
 
       <Modal open={!!authError} onClose={() => setAuthError(null)}>
