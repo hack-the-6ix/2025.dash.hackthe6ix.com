@@ -4,16 +4,16 @@ import cloudSVG from "../assets/cloudsLaptop.svg";
 import cloudPhoneSVG from "../assets/cloudsPhone.svg";
 import cloudMiddle from "../assets/cloudMiddle.svg";
 import firefly from "../assets/firefly.svg";
-import Text from "../components/Text/Text";
+import Text from "../../components/Text/Text";
 import appleWallet from "../assets/apple-add-to-wallet.svg";
 import googleWallet from "../assets/google-add-to-wallet.svg";
 import { Copy } from "lucide-react";
 import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
-import { getDownloadPassQR } from "../api/client";
-import type { Profile } from "../components/types";
+import { getDownloadPassQR } from "../../api/client";
+import type { Profile } from "../../components/types";
 
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
 
 async function addToWalletGoogle(profile: Profile) {
@@ -21,14 +21,20 @@ async function addToWalletGoogle(profile: Profile) {
   const userType = "User";
   const userName = `${profile.firstName} ${profile.lastName}`;
   try {
-    const res = await fetch(`${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/google/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`, { method: 'GET', headers: {
-      'ngrok-skip-browser-warning': 'true'
-    } });
+    const res = await fetch(
+      `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/google/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`,
+      {
+        method: "GET",
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      }
+    );
     const data = await res.json();
     console.log(data);
-    window.open(data.saveUrl, '_blank');
+    window.open(data.saveUrl, "_blank");
   } catch (err) {
-    console.error('Failed to fetch pass:', err);
+    console.error("Failed to fetch pass:", err);
   }
 }
 
@@ -37,9 +43,15 @@ async function addToWalletApple(profile: Profile) {
   const userType = "User";
   const userName = `${profile.firstName} ${profile.lastName}`;
   try {
-    const res = await fetch(`${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`, { method: 'GET', headers: {
-      'ngrok-skip-browser-warning': 'true'
-    } });
+    const res = await fetch(
+      `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`,
+      {
+        method: "GET",
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      }
+    );
     if (!res.ok) {
       console.error("Failed to fetch pass");
       console.log(res);
@@ -47,15 +59,17 @@ async function addToWalletApple(profile: Profile) {
     }
     const blob = await res.blob();
 
-    const url = window.URL.createObjectURL(new Blob([blob], {
-      type: 'application/vnd.apple.pkpass'
-    }));
+    const url = window.URL.createObjectURL(
+      new Blob([blob], {
+        type: "application/vnd.apple.pkpass"
+      })
+    );
     window.location.href = url;
 
     // kill after some time
     setTimeout(() => window.URL.revokeObjectURL(url), 5000);
   } catch (err) {
-    console.error('Failed to fetch pass:', err);
+    console.error("Failed to fetch pass:", err);
   }
 }
 
@@ -69,7 +83,6 @@ export default function Home() {
   const [downloadPassQR, setDownloadPassQR] = useState("");
   const [downloadPassError, setDownloadPassError] = useState("");
 
-
   // Load download pass QR code when profile is available
   useEffect(() => {
     if (profile?._id) {
@@ -77,7 +90,7 @@ export default function Home() {
       getDownloadPassQR({
         userId: profile._id,
         userType: "User",
-        userName: userName,
+        userName: userName
       })
         .then((dataUri) => {
           setDownloadPassQR(dataUri);
@@ -337,10 +350,13 @@ export default function Home() {
               className="flex gap-4 h-full flex-col"
               style={{
                 width: profile.status.confirmed ? "30%" : "0%",
-                display: profile.status.confirmed ? "flex" : "none",
+                display: profile.status.confirmed ? "flex" : "none"
               }}
             >
-              <a href="/schedule" className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center">
+              <a
+                href="/schedule"
+                className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center"
+              >
                 <Text
                   textType="paragraph-sm"
                   textColor="white"
@@ -367,7 +383,7 @@ export default function Home() {
                     textWeight="bold"
                   >
                     <span className="font-bold text-red-500">
-                    {downloadPassError}
+                      {downloadPassError}
                     </span>
                   </Text>
                 ) : (
@@ -379,7 +395,10 @@ export default function Home() {
                   />
                 )}
                 {isIOS() && (
-                  <img src={appleWallet} alt="Add to Apple Wallet" className="w-4/5 h-full cursor-pointer"
+                  <img
+                    src={appleWallet}
+                    alt="Add to Apple Wallet"
+                    className="w-4/5 h-full cursor-pointer"
                     onClick={async () => {
                       if (!profile) {
                         console.error("No profile found");
@@ -390,23 +409,28 @@ export default function Home() {
                   />
                 )}
                 {!isIOS() && (
-                  <img src={googleWallet} alt="Add to Google Wallet" className="w-4/5 h-full cursor-pointer"
-                      onClick={async () => {
-                        if (!profile) {
-                          console.error("No profile found");
-                          return;
-                        }
-                        addToWalletGoogle(profile);
-                      }}
-                    />
+                  <img
+                    src={googleWallet}
+                    alt="Add to Google Wallet"
+                    className="w-4/5 h-full cursor-pointer"
+                    onClick={async () => {
+                      if (!profile) {
+                        console.error("No profile found");
+                        return;
+                      }
+                      addToWalletGoogle(profile);
+                    }}
+                  />
                 )}
-               {(!downloadPassError) && <Text
-                  textType="paragraph-sm"
-                  textColor="secondary"
-                  className="mt-2 text-center"
-                >
-                  Scan this QR code on mobile to download your event pass
-                </Text>}
+                {!downloadPassError && (
+                  <Text
+                    textType="paragraph-sm"
+                    textColor="secondary"
+                    className="mt-2 text-center"
+                  >
+                    Scan this QR code on mobile to download your event pass
+                  </Text>
+                )}
                 <Text
                   textType="paragraph-sm"
                   textColor="primary"
@@ -441,9 +465,7 @@ export default function Home() {
                   If you can no longer attend, please let us know so we can pass
                   this opportunity to a waitlisted hacker.
                 </Text>
-                <button
-                  className="w-full hover:bg-[#f5cecb] rounded-lg border-1 border-[#E42027] bg-white px-4 py-2"
-                >
+                <button className="w-full hover:bg-[#f5cecb] rounded-lg border-1 border-[#E42027] bg-white px-4 py-2">
                   <Text textType="paragraph-sm">
                     <span className="font-bold text-[#E42027]">
                       I can no longer attend

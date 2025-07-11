@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import Home from "./pages/Home";
+import Home from "./pages/Home/Home";
 import DownloadPass from "./pages/DownloadPass";
 import { AuthProvider } from "./contexts/AuthContext";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -13,13 +13,13 @@ import Schedule from "./pages/Schedule";
 
 function AppContent() {
   const { setProfile } = useAuth();
-  const [authError, setAuthError] = useState<AuthResult['error'] | null>(null);
+  const [authError, setAuthError] = useState<AuthResult["error"] | null>(null);
   const location = useLocation();
   const previousLocation = useRef(location.pathname);
 
   const performAuthentication = useCallback(async () => {
     const result = await checkAuth();
-    
+
     if (result.error) {
       setAuthError(result.error);
       setProfile(null);
@@ -33,19 +33,19 @@ function AppContent() {
   useEffect(() => {
     // If we just navigated from callback to home we have new tokens, so try again
     // They're in localStorage, so this isn't handled automatically by React
-    if (previousLocation.current === '/callback' && location.pathname === '/') {
+    if (previousLocation.current === "/callback" && location.pathname === "/") {
       performAuthentication();
     }
-    
+
     previousLocation.current = location.pathname;
   }, [location.pathname, performAuthentication]);
 
   useEffect(() => {
     // Don't run auth check if we're on the callback page - let Callback component handle it
-    if (location.pathname === '/callback') {
+    if (location.pathname === "/callback") {
       return;
     }
-    
+
     performAuthentication();
   }, [location.pathname, performAuthentication]);
 
@@ -73,18 +73,25 @@ function AppContent() {
         <Route path="/callback" element={<Callback />} />
         <Route path="/download-pass" element={<DownloadPass />} />
       </Routes>
-      
+
       <Modal open={!!authError} onClose={() => setAuthError(null)}>
-        <Text textType="heading-md" className="font-bold text-[32px] !text-[#EE721D] mb-4">
-          {authError?.type === "redirect_loop" ? "Authentication Error" : "Connection Error"}
+        <Text
+          textType="heading-md"
+          className="font-bold text-[32px] !text-[#EE721D] mb-4"
+        >
+          {authError?.type === "redirect_loop"
+            ? "Authentication Error"
+            : "Connection Error"}
         </Text>
-        <Text textType="paragraph-lg" textColor="primary" className="mb-6 font-medium leading-snug">
+        <Text
+          textType="paragraph-lg"
+          textColor="primary"
+          className="mb-6 font-medium leading-snug"
+        >
           {authError?.message || "Something went wrong with authentication."}
         </Text>
         <div className="flex flex-col gap-4 justify-center mt-2">
-          <Button onClick={handleRetry}>
-            Try Again
-          </Button>
+          <Button onClick={handleRetry}>Try Again</Button>
           {authError?.type === "redirect_loop" && (
             <Button variant="back" onClick={handleClearData}>
               Clear Data & Retry
