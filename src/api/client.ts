@@ -1,3 +1,5 @@
+import type { PassUserInformation } from "../components/types";
+
 export interface ApiResponse<Data> {
   status: number;
   message: Data;
@@ -61,4 +63,15 @@ export async function getCheckinQR(): Promise<string> {
     { method: "GET" }
   );
   return message;
+}
+
+export async function getDownloadPassQR(userInfo: PassUserInformation): Promise<string> {
+  const res = await fetch(
+    `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/api/action/downloadPassQR?userId=${userInfo.userId}&userType=${userInfo.userType}&userName=${userInfo.userName}`,
+    { method: "GET", headers: {
+      'ngrok-skip-browser-warning': 'true'
+    } }
+  );
+  const data = await res.json();
+  return data.message;
 }

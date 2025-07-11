@@ -4,100 +4,113 @@ import cloudSVG from "../assets/cloudsLaptop.svg";
 import cloudPhoneSVG from "../assets/cloudsPhone.svg";
 import cloudMiddle from "../assets/cloudMiddle.svg";
 import firefly from "../assets/firefly.svg";
-import Text from "../components/Text/Text";
+import Text from "../../components/Text/Text";
+import appleWallet from "../assets/apple-add-to-wallet.svg";
+import googleWallet from "../assets/google-add-to-wallet.svg";
 import { Copy } from "lucide-react";
 import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
-import Modal from "../components/Modal/Modal";
-import { updateRSVP } from "../api/client";
-import { getCheckinQR } from "../api/client";
-import Button from "../components/Button/Button";
+import { getDownloadPassQR } from "../../api/client";
+import type { Profile } from "../../components/types";
 
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { checkAuth } from "../auth/middleware";
+
+async function addToWalletGoogle(profile: Profile) {
+  const userId = profile._id;
+  const userType = "User";
+  const userName = `${profile.firstName} ${profile.lastName}`;
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/google/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`,
+      {
+        method: "GET",
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      }
+    );
+    const data = await res.json();
+    console.log(data);
+    window.open(data.saveUrl, "_blank");
+  } catch (err) {
+    console.error("Failed to fetch pass:", err);
+  }
+}
+
+async function addToWalletApple(profile: Profile) {
+  const userId = profile._id;
+  const userType = "User";
+  const userName = `${profile.firstName} ${profile.lastName}`;
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`,
+      {
+        method: "GET",
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      }
+    );
+    if (!res.ok) {
+      console.error("Failed to fetch pass");
+      console.log(res);
+      return;
+    }
+    const blob = await res.blob();
+
+    const url = window.URL.createObjectURL(
+      new Blob([blob], {
+        type: "application/vnd.apple.pkpass"
+      })
+    );
+    window.location.href = url;
+
+    // kill after some time
+    setTimeout(() => window.URL.revokeObjectURL(url), 5000);
+  } catch (err) {
+    console.error("Failed to fetch pass:", err);
+  }
+}
+
+const isIOS = () => {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+};
 
 export default function Home() {
-  const { profile, setProfile } = useAuth();
+  const { profile } = useAuth();
   const GRASSCOUNT = 40;
-  const [modalType, setModalType] = useState<null | "deny" | "accept">(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [qr, setQr] = useState("");
+  const [downloadPassQR, setDownloadPassQR] = useState("");
+  const [downloadPassError, setDownloadPassError] = useState("");
 
+  // Load download pass QR code when profile is available
   useEffect(() => {
-    setLoading(true);
-    getCheckinQR()
-      .then((dataUri) => {
-        setQr(dataUri);
+    if (profile?._id) {
+      const userName = `${profile.firstName} ${profile.lastName}`;
+      getDownloadPassQR({
+        userId: profile._id,
+        userType: "User",
+        userName: userName
       })
-      .catch((err: any) => {
-        console.error(err);
-        setError("Failed to load QR code");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-
-  const handleRSVP = async (
-    attending: boolean,
-    formData?: { age: number; waiverAgreed: boolean }
-  ) => {
-    setLoading(true);
-    try {
-      if (attending && formData) {
-        await updateRSVP({
-          rsvp: {
-            attending: true,
-            form: formData,
-          },
+        .then((dataUri) => {
+          setDownloadPassQR(dataUri);
+        })
+        .catch((err: any) => {
+          console.error(err);
+          setDownloadPassError("Failed to load download pass QR code");
         });
-      } else {
-        await updateRSVP({
-          rsvp: {
-            attending: false,
-            form: { age: 0, waiverAgreed: false },
-          },
-        });
-      }
-      setModalType(null);
-      const result = await checkAuth();
-      if (!result.error) {
-        setProfile(result.profile);
-      } else if (result.error.type === "auth_failed") {
-        // For API errors, just log and continue - don't disrupt user flow
-        console.log("Profile refresh failed after RSVP:", result.error.message);
-        // Keep current profile state rather than clearing it
-      }
-    } catch (error: unknown) {
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "status" in error &&
-        "message" in error &&
-        (error as { status?: number; message?: string }).status === 403 &&
-        (error as { status?: number; message?: string }).message ===
-          "You are not eligible to RSVP!"
-      ) {
-        alert(
-          "You are not eligible to RSVP. Please check your status or contact support if you believe this is a mistake."
-        );
-      } else {
-        console.error("RSVP error:", error);
-        alert("Failed to update RSVP. Please try again.");
-      }
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [profile?._id]);
 
-  useEffect(() => {
-    console.log("hi", profile);
-  }, []);
+  // TEMPORARY TO FORCE CONFIRMED STATUS
+  // useEffect(() => {
+  //   if (profile && !profile.status.confirmed) {
+  //     profile.status.confirmed = true;
+  //   }
+  // }, [profile]);
 
   return (
-    <div className="sm:gap-0 gap-4 overflow-hidden p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] h-[100vh] w-full flex flex-col justify-center items-center text-center overflow-x-hidden">
+    <div className="flex sm:gap-0 gap-4 overflow-hidden p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] h-[100vh] w-full flex-col justify-center items-center text-center overflow-x-hidden">
       <img
         src={cloudSVG}
         alt="Cloud"
@@ -337,10 +350,13 @@ export default function Home() {
               className="flex gap-4 h-full flex-col"
               style={{
                 width: profile.status.confirmed ? "30%" : "0%",
-                display: profile.status.confirmed ? "flex" : "none",
+                display: profile.status.confirmed ? "flex" : "none"
               }}
             >
-              <a href="/schedule" className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center">
+              <a
+                href="/schedule"
+                className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center"
+              >
                 <Text
                   textType="paragraph-sm"
                   textColor="white"
@@ -358,34 +374,63 @@ export default function Home() {
                   textColor="primary"
                   textWeight="bold"
                 >
-                  Participant Code
+                  Download Pass
                 </Text>
-                {error ? (
+                {downloadPassError ? (
                   <Text
                     textType="paragraph-lg"
                     textColor="primary"
                     textWeight="bold"
                   >
                     <span className="font-bold text-red-500">
-                    {error}
+                      {downloadPassError}
                     </span>
                   </Text>
                 ) : (
                   <img
-                    src={qr}
-                    alt="Your check-in QR code"
+                    src={downloadPassQR}
+                    alt="Your download pass QR code"
                     className="my-2"
                     style={{ width: 100, height: 100 }}
                   />
                 )}
-                <Text
-                  textType="paragraph-sm"
-                  textColor="secondary"
-                  className="mt-1 mb-2 text-center"
-                >
-                  Show this QR code to check-in, grab food, participate in
-                  activities, etc! We recommend screenshotting this.
-                </Text>
+                {isIOS() && (
+                  <img
+                    src={appleWallet}
+                    alt="Add to Apple Wallet"
+                    className="w-4/5 h-full cursor-pointer"
+                    onClick={async () => {
+                      if (!profile) {
+                        console.error("No profile found");
+                        return;
+                      }
+                      addToWalletApple(profile);
+                    }}
+                  />
+                )}
+                {!isIOS() && (
+                  <img
+                    src={googleWallet}
+                    alt="Add to Google Wallet"
+                    className="w-4/5 h-full cursor-pointer"
+                    onClick={async () => {
+                      if (!profile) {
+                        console.error("No profile found");
+                        return;
+                      }
+                      addToWalletGoogle(profile);
+                    }}
+                  />
+                )}
+                {!downloadPassError && (
+                  <Text
+                    textType="paragraph-sm"
+                    textColor="secondary"
+                    className="mt-2 text-center"
+                  >
+                    Scan this QR code on mobile to download your event pass
+                  </Text>
+                )}
                 <Text
                   textType="paragraph-sm"
                   textColor="primary"
@@ -420,10 +465,7 @@ export default function Home() {
                   If you can no longer attend, please let us know so we can pass
                   this opportunity to a waitlisted hacker.
                 </Text>
-                <button
-                  onClick={() => setModalType("deny")}
-                  className="w-full hover:bg-[#f5cecb] rounded-lg border-1 border-[#E42027] bg-white px-4 py-2"
-                >
+                <button className="w-full hover:bg-[#f5cecb] rounded-lg border-1 border-[#E42027] bg-white px-4 py-2">
                   <Text textType="paragraph-sm">
                     <span className="font-bold text-[#E42027]">
                       I can no longer attend
@@ -435,35 +477,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      <Modal open={modalType === "deny"} onClose={() => setModalType(null)}>
-        <Text
-          textType="heading-md"
-          className="font-bold text-[32px] !text-[#EE721D] mb-4"
-        >
-          Can no longer attend HT6?
-        </Text>
-        <Text
-          textType="paragraph-lg"
-          textColor="primary"
-          className="mb-6 font-medium leading-snug"
-        >
-          This opportunity will be passed onto a waitlisted participant. This
-          action cannot be undone.
-        </Text>
-        <div className="flex sm:flex-row flex-col gap-4 justify-center mt-2">
-          <Button onClick={() => handleRSVP(false)} disabled={loading}>
-            {loading ? "Submitting..." : "I can no longer attend"}
-          </Button>
-          <Button
-            variant="back"
-            onClick={() => setModalType(null)}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-        </div>
-      </Modal>
     </div>
   );
 }

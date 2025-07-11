@@ -18,7 +18,7 @@ export default function Schedule() {
     { color: "#0A7837", label: "Ceremonies" },
     { color: "#E42027", label: "Workshops" },
     { color: "#0dc6de", label: "Activities" },
-    { color: "#edc009", label: "Food" },
+    { color: "#edc009", label: "Food" }
   ];
 
   return (
