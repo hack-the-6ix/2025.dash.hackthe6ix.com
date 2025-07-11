@@ -1,6 +1,5 @@
-"use client";
 import Text from "../Text/Text";
-import { useState } from "react";
+import Modal from "./Modal";
 
 export interface EventProps {
   type: string;
@@ -26,9 +25,9 @@ export default function Event({
   location,
   name,
   start,
+  description,
   end,
   height,
-  description,
 }: EventProps) {
   const parseTime = (iso: string) => new Date(iso.replace(/Z$/, ""));
   const borderColor = TYPE_BORDER[type] || "border-gray-400";

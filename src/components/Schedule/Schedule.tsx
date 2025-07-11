@@ -6,6 +6,10 @@ import { useState } from "react";
 import Text from "../Text/Text";
 import { format } from "date-fns";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import type { EventFields } from "../../api/airtable";
+import { useEffect } from "react";
+import Modal from "./Modal";
+import ModalPortal from "./ModalPortal";
 
 export default function EventsList() {
   const parseTime = (iso: string) => new Date(iso.replace(/Z$/, ""));
@@ -32,9 +36,11 @@ export default function EventsList() {
     Workshops: "#E42027",
   };
 
+  const [selected, setSelected] = useState<EventFields | null>(null);
   const [date, setDate] = useState("2025-07-18");
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterItem, setFilterItem] = useState("");
+  const [nowRow, setNowRow] = useState<number | null>(null);
 
   const { events, loading, error } = useEvents(date);
 
@@ -73,6 +79,23 @@ export default function EventsList() {
     const slotMinutes = 60 / PERIODS_PER_HOUR;
     return Math.max(1, Math.ceil(diffMs / (1000 * 60 * slotMinutes)));
   };
+
+  useEffect(() => {
+    console.log(new Date())
+    const todayStr = format(new Date(), "yyyy-MM-dd");
+    if (date !== todayStr) {
+      setNowRow(null);
+      return;
+    }
+
+    const updateLine = () => {
+      setNowRow(getRowStart((new Date()).toString()));
+    };
+
+    updateLine(); 
+    const timer = setInterval(updateLine, 60_000);
+    return () => clearInterval(timer);
+  }, [date, earliestHour, latestHour, HOURS]);
 
   if (loading) return <p>Loading events…</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
@@ -168,7 +191,7 @@ export default function EventsList() {
       )}
 
       <div
-        className="grid grid-cols-[80px_1fr] gap-[1px] w-full"
+        className="relative grid grid-cols-[80px_1fr] gap-[1px] w-full"
         style={{ gridTemplateRows: `repeat(${TOTAL_SLOTS}, ${SLOT_HEIGHT}px)` }}
       >
         {HOURS.map((h, i) => (
@@ -188,10 +211,11 @@ export default function EventsList() {
           const startRow = getRowStart(fields.Start);
           const span = getRowSpan(fields.Start, fields.End);
           const { count, index } = overlapInfo[id];
-          const slotWidth = Math.max(100 / count, 35);
+          const slotWidth = Math.max(100 / count, 40);
           const leftOffset = index * slotWidth;
           return (
             <div
+              onClick={() => setSelected(fields)}
               key={id}
               className="px-1"
               style={{
@@ -208,12 +232,40 @@ export default function EventsList() {
                 end={fields.End}
                 location={fields.Location ?? "TBD"}
                 description={fields.Description}
-                height={fields.Name == "Hacking Begins" ? 8 * SLOT_HEIGHT + "px" : span * SLOT_HEIGHT + "px"}
+                height={
+                  fields.Name == "Hacking Begins"
+                    ? 8 * SLOT_HEIGHT + "px"
+                    : span * SLOT_HEIGHT + "px"
+                }
               />
             </div>
           );
         })}
+        {nowRow && (
+          <div
+            className="absolute left-[80px] right-0 flex items-center pointer-events-none w-full"
+            style={{ gridRow: `${nowRow} / span 1` }}
+          >
+            <div className="w-[12px] h-[12px] bg-red-500 rounded-full" />
+            <div className="flex-1 h-[3px] w-full bg-red-500" />
+          </div>
+        )}
       </div>
+
+      {selected && (
+        <ModalPortal>
+          <Modal
+            type={selected.Type}
+            name={selected.Name}
+            date={date}
+            start={selected.Start}
+            end={selected.End}
+            location={selected.Location ?? "TBD"}
+            description={selected.Description}
+            onClose={() => setSelected(null)}
+          />
+        </ModalPortal>
+      )}
     </div>
   );
 }
