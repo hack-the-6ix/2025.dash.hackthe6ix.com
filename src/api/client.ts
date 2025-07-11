@@ -20,7 +20,7 @@ export interface RSVPResponse {
 
 export async function fetchHt6<T, P = undefined>(
   path: string,
-  options: { body?: P; method?: string } = {}
+  options: { body?: P; method?: string } = {},
 ): Promise<T> {
   const token = localStorage.getItem("token");
   const headers: Record<string, string> = {
@@ -60,17 +60,22 @@ export async function updateRSVP(data: {
 export async function getCheckinQR(): Promise<string> {
   const { message } = await fetchHt6<ApiResponse<string>>(
     "/api/action/checkInQR",
-    { method: "GET" }
+    { method: "GET" },
   );
   return message;
 }
 
-export async function getDownloadPassQR(userInfo: PassUserInformation): Promise<string> {
+export async function getDownloadPassQR(
+  userInfo: PassUserInformation,
+): Promise<string> {
   const res = await fetch(
     `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/api/action/downloadPassQR?userId=${userInfo.userId}&userType=${userInfo.userType}&userName=${userInfo.userName}`,
-    { method: "GET", headers: {
-      'ngrok-skip-browser-warning': 'true'
-    } }
+    {
+      method: "GET",
+      headers: {
+        "ngrok-skip-browser-warning": "true",
+      },
+    },
   );
   const data = await res.json();
   return data.message;

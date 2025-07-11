@@ -57,7 +57,7 @@ const Text = React.forwardRef<HTMLSpanElement, TextProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const Component = as ?? "span";
 
@@ -71,13 +71,13 @@ const Text = React.forwardRef<HTMLSpanElement, TextProps>(
           styles[`type--${textType}`],
           styles.text,
           styles[`font--${textFont}`],
-          className
+          className,
         )}
       >
         {children}
       </Component>
     );
-  }
+  },
 );
 
 Text.displayName = "Text";

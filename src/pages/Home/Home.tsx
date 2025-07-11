@@ -1,12 +1,12 @@
-import grassSVG from "../assets/grass.svg";
-import tree1SVG from "../assets/tree1.svg";
-import cloudSVG from "../assets/cloudsLaptop.svg";
-import cloudPhoneSVG from "../assets/cloudsPhone.svg";
-import cloudMiddle from "../assets/cloudMiddle.svg";
-import firefly from "../assets/firefly.svg";
+import grassSVG from "../../assets/grass.svg";
+import tree1SVG from "../../assets/tree1.svg";
+import cloudSVG from "../../assets/cloudsLaptop.svg";
+import cloudPhoneSVG from "../../assets/cloudsPhone.svg";
+import cloudMiddle from "../../assets/cloudMiddle.svg";
+import firefly from "../../assets/firefly.svg";
 import Text from "../../components/Text/Text";
-import appleWallet from "../assets/apple-add-to-wallet.svg";
-import googleWallet from "../assets/google-add-to-wallet.svg";
+import appleWallet from "../../assets/apple-add-to-wallet.svg";
+import googleWallet from "../../assets/google-add-to-wallet.svg";
 import { Copy } from "lucide-react";
 import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
@@ -85,22 +85,25 @@ export default function Home() {
 
   // Load download pass QR code when profile is available
   useEffect(() => {
-    if (profile?._id) {
-      const userName = `${profile.firstName} ${profile.lastName}`;
+    const userId = profile?._id;
+    const firstName = profile?.firstName;
+    const lastName = profile?.lastName;
+    if (userId) {
+      const userName = `${firstName} ${lastName}`;
       getDownloadPassQR({
-        userId: profile._id,
+        userId: userId,
         userType: "User",
         userName: userName
       })
         .then((dataUri) => {
           setDownloadPassQR(dataUri);
         })
-        .catch((err: any) => {
-          console.error(err);
+        .catch((e: unknown) => {
+          console.error(e);
           setDownloadPassError("Failed to load download pass QR code");
         });
     }
-  }, [profile?._id]);
+  }, [profile?._id, profile?.firstName, profile?.lastName]);
 
   // TEMPORARY TO FORCE CONFIRMED STATUS
   // useEffect(() => {

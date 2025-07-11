@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { fetchHt6, type ApiResponse } from "../../api/client.ts";
 import Text from "../../components/Text/Text";
 import cloudSVG from "../../assets/cloudsLaptop.svg";
@@ -9,6 +9,8 @@ import firefly from "../../assets/firefly.svg";
 import grassSVG from "../../assets/grass.svg";
 import tree1SVG from "../../assets/tree1.svg";
 
+type ErrorWithStatus = Error & { status?: number | undefined };
+
 function DiscordCallback() {
   const [error, setError] = useState<{
     message: string;
@@ -17,7 +19,6 @@ function DiscordCallback() {
   console.log(error);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -61,10 +62,13 @@ function DiscordCallback() {
             status: response.status
           });
         }
-      } catch (err: any) {
+      } catch (e: unknown) {
         setError({
-          message: err.message || "Unknown Error",
-          status: err.status || 501
+          message: (e as Error).message || "Unknown Error",
+          status:
+            typeof (e as ErrorWithStatus).status === "number"
+              ? ((e as ErrorWithStatus).status ?? 501)
+              : 501
         });
       } finally {
         setLoading(false);

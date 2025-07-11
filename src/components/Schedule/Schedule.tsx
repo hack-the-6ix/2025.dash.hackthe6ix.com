@@ -2,7 +2,7 @@
 
 import { useEvents } from "../../hooks/useEvents";
 import Event from "./Event";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Text from "../Text/Text";
 import { format } from "date-fns";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -12,7 +12,10 @@ import Modal from "./Modal";
 import ModalPortal from "./ModalPortal";
 
 export default function EventsList() {
-  const parseTime = (iso: string) => new Date(iso.replace(/Z$/, ""));
+  const parseTime = useCallback(
+    (iso: string) => new Date(iso.replace(/Z$/, "")),
+    []
+  );
   const parseDate = (isoDate: string) => {
     const [year, month, day] = isoDate.split("-").map(Number);
     return new Date(year, month - 1, day);
@@ -24,7 +27,7 @@ export default function EventsList() {
     "Ceremonies",
     "Activities",
     "Food",
-    "Workshops",
+    "Workshops"
   ];
 
   const TYPE_BORDER: Record<string, string> = {
@@ -33,7 +36,7 @@ export default function EventsList() {
     Ceremonies: "#0A7837",
     Activities: "#0dc6de",
     Food: "#edc009",
-    Workshops: "#E42027",
+    Workshops: "#E42027"
   };
 
   const [selected, setSelected] = useState<EventFields | null>(null);
@@ -67,12 +70,15 @@ export default function EventsList() {
   );
   const TOTAL_SLOTS = HOURS.length * PERIODS_PER_HOUR;
 
-  const getRowStart = (ts: string) => {
-    const d = parseTime(ts);
-    const hourIdx = d.getHours() - HOURS[0];
-    const minuteSlot = Math.floor(d.getMinutes() / (60 / PERIODS_PER_HOUR));
-    return hourIdx * PERIODS_PER_HOUR + minuteSlot + 1;
-  };
+  const getRowStart = useCallback(
+    (ts: string) => {
+      const d = parseTime(ts);
+      const hourIdx = d.getHours() - HOURS[0];
+      const minuteSlot = Math.floor(d.getMinutes() / (60 / PERIODS_PER_HOUR));
+      return hourIdx * PERIODS_PER_HOUR + minuteSlot + 1;
+    },
+    [HOURS, PERIODS_PER_HOUR, parseTime]
+  );
 
   const getRowSpan = (startTs: string, endTs: string) => {
     const diffMs = parseTime(endTs).getTime() - parseTime(startTs).getTime();
@@ -81,7 +87,7 @@ export default function EventsList() {
   };
 
   useEffect(() => {
-    console.log(new Date())
+    console.log(new Date());
     const todayStr = format(new Date(), "yyyy-MM-dd");
     if (date !== todayStr) {
       setNowRow(null);
@@ -89,13 +95,13 @@ export default function EventsList() {
     }
 
     const updateLine = () => {
-      setNowRow(getRowStart((new Date()).toString()));
+      setNowRow(getRowStart(new Date().toString()));
     };
 
-    updateLine(); 
+    updateLine();
     const timer = setInterval(updateLine, 60_000);
     return () => clearInterval(timer);
-  }, [date, earliestHour, latestHour, HOURS]);
+  }, [date, earliestHour, latestHour, HOURS, getRowStart]);
 
   if (loading) return <p>Loading events…</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
@@ -133,14 +139,14 @@ export default function EventsList() {
             className="flex-1 text-center cursor-pointer"
             onClick={() => setDate(d)}
             style={{
-              borderBottom: `${date === d ? "3px #F47F1F" : "1px black"} solid`,
+              borderBottom: `${date === d ? "3px #F47F1F" : "1px black"} solid`
             }}
           >
             <Text textType="paragraph-lg" textColor="primary" className="py-3">
               <span
                 style={{
                   color: date === d ? "#F47F1F" : "#08566B",
-                  fontWeight: date === d ? 600 : 400,
+                  fontWeight: date === d ? 600 : 400
                 }}
               >
                 {format(parseDate(d), "EEE. MMM d")}
@@ -180,7 +186,7 @@ export default function EventsList() {
                 className={`px-3 rounded-full text-sm font-medium text-white
                 }`}
                 style={{
-                  backgroundColor: isActive ? "#F47F1F" : TYPE_BORDER[type],
+                  backgroundColor: isActive ? "#F47F1F" : TYPE_BORDER[type]
                 }}
               >
                 {type}
@@ -200,7 +206,7 @@ export default function EventsList() {
             className="text-left text-sm text-[#08566B] font-bold"
             style={{
               gridColumn: 1,
-              gridRow: `${i * PERIODS_PER_HOUR + 1} / span ${PERIODS_PER_HOUR}`,
+              gridRow: `${i * PERIODS_PER_HOUR + 1} / span ${PERIODS_PER_HOUR}`
             }}
           >
             {h < 12 ? `${h} AM` : h === 12 ? "12 PM" : `${h - 12} PM`}
@@ -222,7 +228,7 @@ export default function EventsList() {
                 gridColumn: 2,
                 gridRow: `${startRow} / span ${span}`,
                 width: `${slotWidth}%`,
-                marginLeft: `${leftOffset}%`,
+                marginLeft: `${leftOffset}%`
               }}
             >
               <Event

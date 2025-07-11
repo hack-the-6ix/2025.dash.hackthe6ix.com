@@ -1,9 +1,9 @@
-import grassSVG from "../assets/grass.svg";
-import tree1SVG from "../assets/tree1.svg";
-import cloudSVG from "../assets/cloudsLaptop.svg";
-import cloudPhoneSVG from "../assets/cloudsPhone.svg";
-import cloudMiddle from "../assets/cloudMiddle.svg";
-import firefly from "../assets/firefly.svg";
+import grassSVG from "../../assets/grass.svg";
+import tree1SVG from "../../assets/tree1.svg";
+import cloudSVG from "../../assets/cloudsLaptop.svg";
+import cloudPhoneSVG from "../../assets/cloudsPhone.svg";
+import cloudMiddle from "../../assets/cloudMiddle.svg";
+import firefly from "../../assets/firefly.svg";
 import Text from "../../components/Text/Text";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";

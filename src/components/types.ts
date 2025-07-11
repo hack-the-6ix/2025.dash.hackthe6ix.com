@@ -28,7 +28,7 @@ export interface Profile {
     admin: boolean;
     organizer: boolean;
     volunteer: boolean;
-  }
+  };
   status: {
     accepted: boolean;
     textStatus: string;

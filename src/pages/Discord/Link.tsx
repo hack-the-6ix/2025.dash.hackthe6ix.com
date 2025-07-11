@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { fetchHt6, type ApiResponse } from "../../api/client.ts";
 import Text from "../../components/Text/Text";
 import cloudSVG from "../../assets/cloudsLaptop.svg";
@@ -9,13 +8,13 @@ import firefly from "../../assets/firefly.svg";
 import grassSVG from "../../assets/grass.svg";
 import tree1SVG from "../../assets/tree1.svg";
 
+type ErrorWithStatus = Error & { status?: number | undefined };
+
 function DiscordLink() {
   const [error, setError] = useState<{
     message: string;
     status: number;
   } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getOAuthLink = async () => {
@@ -43,13 +42,14 @@ function DiscordLink() {
           message: (response.message as string) || "Unknown Error",
           status: response.status
         });
-      } catch (err: any) {
+      } catch (e: unknown) {
+        const err = e as ErrorWithStatus;
         setError({
           message: err.message || "Unknown Error",
-          status: err.status || 501
+          status: (err.status as number) || 501
         });
       } finally {
-        setLoading(false);
+        // setLoading(false); // Removed as per edit hint
       }
     };
 
