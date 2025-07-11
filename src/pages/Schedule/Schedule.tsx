@@ -1,13 +1,13 @@
-import grassSVG from "../assets/grass.svg";
-import tree1SVG from "../assets/tree1.svg";
-import cloudSVG from "../assets/cloudsLaptop.svg";
-import cloudPhoneSVG from "../assets/cloudsPhone.svg";
-import cloudMiddle from "../assets/cloudMiddle.svg";
-import firefly from "../assets/firefly.svg";
-import Text from "../components/Text/Text";
+import grassSVG from "../../assets/grass.svg";
+import tree1SVG from "../../assets/tree1.svg";
+import cloudSVG from "../../assets/cloudsLaptop.svg";
+import cloudPhoneSVG from "../../assets/cloudsPhone.svg";
+import cloudMiddle from "../../assets/cloudMiddle.svg";
+import firefly from "../../assets/firefly.svg";
+import Text from "../../components/Text/Text";
 import { ArrowRight } from "lucide-react";
 
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Schedule() {
   const { profile } = useAuth();
@@ -16,7 +16,7 @@ export default function Schedule() {
     { color: "#680088", label: "Main Events" },
     { color: "#0A7837", label: "Sponsor bay" },
     { color: "#EE721E", label: "Socials" },
-    { color: "#E42027", label: "Workshops" },
+    { color: "#E42027", label: "Workshops" }
   ];
 
   return (
