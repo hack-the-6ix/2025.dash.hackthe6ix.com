@@ -40,7 +40,7 @@ export default function EventsList() {
 
   const EVENTDATES = ["2025-07-18", "2025-07-19", "2025-07-20"];
   const PERIODS_PER_HOUR = 4;
-  const SLOT_HEIGHT = 25; 
+  const SLOT_HEIGHT = 25;
 
   const startDates = events.map((e) => parseTime(e.fields.Start));
   const endDates = events.map((e) => parseTime(e.fields.End));
@@ -49,7 +49,9 @@ export default function EventsList() {
     : 8;
   const latestHour = endDates.length
     ? Math.max(
-        ...endDates.map((d) => (d.getMinutes() ? d.getHours() + 1 : d.getHours()))
+        ...endDates.map((d) =>
+          d.getMinutes() ? d.getHours() + 1 : d.getHours()
+        )
       )
     : 20;
 
@@ -79,21 +81,25 @@ export default function EventsList() {
     filterItem ? ev.fields.Type === filterItem : true
   );
   const sorted = [...filtered].sort(
-    (a, b) => parseTime(a.fields.Start).getTime() - parseTime(b.fields.Start).getTime()
+    (a, b) =>
+      parseTime(a.fields.Start).getTime() - parseTime(b.fields.Start).getTime()
   );
 
-  const overlapInfo = sorted.reduce((acc, ev, _, arr) => {
-    const collisions = arr.filter((o) => {
-      const s1 = parseTime(o.fields.Start).getTime();
-      const e1 = parseTime(o.fields.End).getTime();
-      const s2 = parseTime(ev.fields.Start).getTime();
-      const e2 = parseTime(ev.fields.End).getTime();
-      return s1 < e2 && s2 < e1;
-    });
-    const index = collisions.findIndex((o) => o.id === ev.id);
-    acc[ev.id] = { count: collisions.length, index };
-    return acc;
-  }, {} as Record<string, { count: number; index: number }>);
+  const overlapInfo = sorted.reduce(
+    (acc, ev, _, arr) => {
+      const collisions = arr.filter((o) => {
+        const s1 = parseTime(o.fields.Start).getTime();
+        const e1 = parseTime(o.fields.End).getTime();
+        const s2 = parseTime(ev.fields.Start).getTime();
+        const e2 = parseTime(ev.fields.End).getTime();
+        return s1 < e2 && s2 < e1;
+      });
+      const index = collisions.findIndex((o) => o.id === ev.id);
+      acc[ev.id] = { count: collisions.length, index };
+      return acc;
+    },
+    {} as Record<string, { count: number; index: number }>
+  );
 
   return (
     <div className="w-full">
@@ -122,7 +128,7 @@ export default function EventsList() {
       </div>
 
       <div
-        className="flex items-center gap-2 mb-6 cursor-pointer"
+        className="flex items-center gap-2 mb-2 cursor-pointer"
         onClick={() => setFilterOpen((o) => !o)}
       >
         <Text textType="paragraph-sm" textColor="primary">
@@ -135,7 +141,9 @@ export default function EventsList() {
           <button
             onClick={() => setFilterItem("")}
             className={`px-3 py-1 rounded-full text-sm font-medium ${
-              filterItem === "" ? "bg-[#F47F1F] text-white" : "bg-gray-200 text-gray-700"
+              filterItem === ""
+                ? "bg-[#F47F1F] text-white"
+                : "bg-white text-black"
             }`}
           >
             All
@@ -146,10 +154,11 @@ export default function EventsList() {
               <button
                 key={type}
                 onClick={() => setFilterItem(type)}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  isActive ? "text-white" : "bg-gray-200 text-gray-700"
+                className={`px-3 rounded-full text-sm font-medium text-white
                 }`}
-                style={{ backgroundColor: isActive ? TYPE_BORDER[type] : undefined }}
+                style={{
+                  backgroundColor: isActive ? "#F47F1F" : TYPE_BORDER[type],
+                }}
               >
                 {type}
               </button>
@@ -179,7 +188,7 @@ export default function EventsList() {
           const startRow = getRowStart(fields.Start);
           const span = getRowSpan(fields.Start, fields.End);
           const { count, index } = overlapInfo[id];
-          const slotWidth = 100 / count;
+          const slotWidth = Math.max(100 / count, 35);
           const leftOffset = index * slotWidth;
           return (
             <div
@@ -199,7 +208,7 @@ export default function EventsList() {
                 end={fields.End}
                 location={fields.Location ?? "TBD"}
                 description={fields.Description}
-                height={span*25+"px"}
+                height={fields.Name == "Hacking Begins" ? 8 * SLOT_HEIGHT + "px" : span * SLOT_HEIGHT + "px"}
               />
             </div>
           );

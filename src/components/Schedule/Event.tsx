@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Text from "../Text/Text";
 import { useState } from "react";
 
@@ -30,8 +30,6 @@ export default function Event({
   height,
   description,
 }: EventProps) {
-  const [selected, setSelected] = useState<EventProps | null>(null);
-
   const parseTime = (iso: string) => new Date(iso.replace(/Z$/, ""));
   const borderColor = TYPE_BORDER[type] || "border-gray-400";
   const startTime = parseTime(start).toLocaleTimeString([], {
@@ -43,33 +41,6 @@ export default function Event({
     minute: "2-digit",
   });
 
-  if (type == "Announcements") {
-    return (
-      <div
-        className="
-        w-full
-        relative
-        bg-white/80
-        rounded-lg
-        py-3
-        pl-8
-        pr-3
-        items-start
-        flex flex-col"
-        style={{ background: borderColor }}
-      >
-        <Text textType="subtitle-sm" textColor="white" textWeight="semi-bold">
-          {name}
-        </Text>
-
-        <Text textType="subtitle-sm" textColor="white" className="mt-1">
-          <span className="font-light">
-            {startTime} – {endTime} @ {location}
-          </span>
-        </Text>
-      </div>
-    );
-  }
   const words = name.split(/\s+/);
   const displayName =
     words.length > 7 ? words.slice(0, 7).join(" ") + "..." : name;
@@ -79,34 +50,41 @@ export default function Event({
       className="
         w-full
         relative
-        bg-white/80
         rounded-lg
         py-3
-        pl-8
-        pr-3
+        pl-6
+        pr-2
         items-start
+        justify-start
         flex flex-col "
-      style={{ height: height }}
+      style={{
+        height: height,
+        background: type == "Announcements" ? borderColor : "white",
+      }}
     >
       <div
         className="h-full absolute top-0 left-0 w-[15px]"
         style={{ background: borderColor }}
       ></div>
-      <Text textType="paragraph-lg" textColor="primary" textWeight="semi-bold">
-        <span className="font-semibold">{displayName.toUpperCase()}</span>
+      <Text
+        textType="paragraph-sm"
+        textColor={type == "Announcements" ? "white" : "primary"}
+        className="text-left"
+      >
+        <span className="font-semibold text-left">
+          {displayName.toUpperCase()}
+        </span>
       </Text>
 
       <Text
         textType="paragraph-sm"
-        textColor="primary"
-        textWeight="regular"
-        className="mt-1 font-regular"
+        textColor={type == "Announcements" ? "white" : "primary"}
+        className="mt-1 text-left"
       >
-        <span className="font-light">
+        <span className="font-light text-left">
           {startTime} – {endTime} @ {location}
         </span>
       </Text>
     </div>
-    
   );
 }
