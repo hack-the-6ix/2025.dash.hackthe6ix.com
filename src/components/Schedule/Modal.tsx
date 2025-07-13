@@ -23,7 +23,7 @@ const TYPE_BORDER: Record<string, string> = {
   Ceremonies: "#0A7837",
   Activities: "#0dc6de",
   Food: "#edc009",
-  Workshops: "#E42027"
+  Workshops: "#E42027",
 };
 
 export default function Modal({
@@ -34,7 +34,7 @@ export default function Modal({
   date,
   end,
   description,
-  onClose
+  onClose,
 }: EventProps) {
   const parseTime = (iso: string) => new Date(iso.replace(/Z$/, ""));
   const parseDate = (isoDate: string) => {
@@ -45,11 +45,11 @@ export default function Modal({
   const borderColor = TYPE_BORDER[type] || "border-gray-400";
   const startTime = parseTime(start).toLocaleTimeString([], {
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
   });
   const endTime = parseTime(end).toLocaleTimeString([], {
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
   });
   const eventDate = parseDate(date);
 
@@ -73,7 +73,7 @@ export default function Modal({
       `DESCRIPTION:${description || ""}`,
       `LOCATION:${location}`,
       "END:VEVENT",
-      "END:VCALENDAR"
+      "END:VCALENDAR",
     ].join("\r\n");
     const blob = new Blob([lines], { type: "text/calendar" });
     const url = URL.createObjectURL(blob);

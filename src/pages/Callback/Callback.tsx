@@ -33,8 +33,8 @@ export default function Callback() {
           "/auth/dash-backend/callback",
           {
             method: "POST",
-            body: { state: state || "", code: code || "" }
-          }
+            body: { state: state || "", code: code || "" },
+          },
         );
 
         if (

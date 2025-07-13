@@ -29,8 +29,8 @@ function DiscordLink() {
               window.location.protocol +
               "//" +
               window.location.host +
-              "/discord/callback"
-          }
+              "/discord/callback",
+          },
         });
 
         if (response.message && response.message.startsWith("http")) {
@@ -40,13 +40,13 @@ function DiscordLink() {
 
         setError({
           message: (response.message as string) || "Unknown Error",
-          status: response.status
+          status: response.status,
         });
       } catch (e: unknown) {
         const err = e as ErrorWithStatus;
         setError({
           message: err.message || "Unknown Error",
-          status: (err.status as number) || 501
+          status: (err.status as number) || 501,
         });
       } finally {
         // setLoading(false); // Removed as per edit hint

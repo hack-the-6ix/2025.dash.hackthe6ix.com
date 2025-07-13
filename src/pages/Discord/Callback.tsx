@@ -29,7 +29,7 @@ function DiscordCallback() {
     if (!state || !code) {
       setError({
         message: "Missing required parameters",
-        status: 400
+        status: 400,
       });
       setLoading(false);
       return;
@@ -44,8 +44,8 @@ function DiscordCallback() {
           method: "POST",
           body: {
             state,
-            code
-          }
+            code,
+          },
         });
 
         if (response.status === 200) {
@@ -59,7 +59,7 @@ function DiscordCallback() {
         } else {
           setError({
             message: (response.message as string) || "Unknown Error",
-            status: response.status
+            status: response.status,
           });
         }
       } catch (e: unknown) {
@@ -68,7 +68,7 @@ function DiscordCallback() {
           status:
             typeof (e as ErrorWithStatus).status === "number"
               ? ((e as ErrorWithStatus).status ?? 501)
-              : 501
+              : 501,
         });
       } finally {
         setLoading(false);

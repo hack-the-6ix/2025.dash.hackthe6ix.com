@@ -25,7 +25,7 @@ function CountdownTimer() {
         const diff = hackingStarts.getTime() - now.getTime();
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
-          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
         );
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -89,7 +89,7 @@ export default function Schedule() {
     { color: "#0A7837", label: "Ceremonies" },
     { color: "#E42027", label: "Workshops" },
     { color: "#0dc6de", label: "Activities" },
-    { color: "#edc009", label: "Food" }
+    { color: "#edc009", label: "Food" },
   ];
 
   return (

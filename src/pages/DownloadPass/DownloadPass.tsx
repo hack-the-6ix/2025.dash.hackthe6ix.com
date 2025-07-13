@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 
 const isMobile = () => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
+    navigator.userAgent,
   );
 };
 
@@ -27,9 +27,9 @@ const downloadIOSPass = async (user: {
       {
         method: "GET",
         headers: {
-          "ngrok-skip-browser-warning": "true"
-        }
-      }
+          "ngrok-skip-browser-warning": "true",
+        },
+      },
     );
 
     if (!response.ok) {
@@ -39,8 +39,8 @@ const downloadIOSPass = async (user: {
     const blob = await response.blob();
     const url = window.URL.createObjectURL(
       new Blob([blob], {
-        type: "application/vnd.apple.pkpass"
-      })
+        type: "application/vnd.apple.pkpass",
+      }),
     );
 
     window.location.href = url;
@@ -64,9 +64,9 @@ const downloadGooglePass = async (user: {
       {
         method: "GET",
         headers: {
-          "ngrok-skip-browser-warning": "true"
-        }
-      }
+          "ngrok-skip-browser-warning": "true",
+        },
+      },
     );
 
     if (!response.ok) {
@@ -112,7 +112,7 @@ export default function DownloadPass() {
       const user = {
         userId: userId,
         userType: userType || "User",
-        userName: userName || ""
+        userName: userName || "",
       };
 
       try {

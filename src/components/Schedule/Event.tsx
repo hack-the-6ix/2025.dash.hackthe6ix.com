@@ -16,7 +16,7 @@ const TYPE_BORDER: Record<string, string> = {
   Ceremonies: "#0A7837",
   Activities: "#0dc6de",
   Food: "#edc009",
-  Workshops: "#E42027"
+  Workshops: "#E42027",
 };
 
 export default function Event({
@@ -25,17 +25,17 @@ export default function Event({
   name,
   start,
   end,
-  height
+  height,
 }: EventProps) {
   const parseTime = (iso: string) => new Date(iso.replace(/Z$/, ""));
   const borderColor = TYPE_BORDER[type] || "border-gray-400";
   const startTime = parseTime(start).toLocaleTimeString([], {
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
   });
   const endTime = parseTime(end).toLocaleTimeString([], {
     hour: "numeric",
-    minute: "2-digit"
+    minute: "2-digit",
   });
 
   const words = name.split(/\s+/);
@@ -59,7 +59,7 @@ export default function Event({
         flex flex-col "
       style={{
         height: height,
-        background: type == "Announcements" ? borderColor : "white"
+        background: type == "Announcements" ? borderColor : "white",
       }}
     >
       <div

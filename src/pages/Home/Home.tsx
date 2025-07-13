@@ -26,9 +26,9 @@ async function addToWalletGoogle(profile: Profile) {
       {
         method: "GET",
         headers: {
-          "ngrok-skip-browser-warning": "true"
-        }
-      }
+          "ngrok-skip-browser-warning": "true",
+        },
+      },
     );
     const data = await res.json();
     console.log(data);
@@ -48,9 +48,9 @@ async function addToWalletApple(profile: Profile) {
       {
         method: "GET",
         headers: {
-          "ngrok-skip-browser-warning": "true"
-        }
-      }
+          "ngrok-skip-browser-warning": "true",
+        },
+      },
     );
     if (!res.ok) {
       console.error("Failed to fetch pass");
@@ -61,8 +61,8 @@ async function addToWalletApple(profile: Profile) {
 
     const url = window.URL.createObjectURL(
       new Blob([blob], {
-        type: "application/vnd.apple.pkpass"
-      })
+        type: "application/vnd.apple.pkpass",
+      }),
     );
     window.location.href = url;
 
@@ -92,7 +92,7 @@ export default function Home() {
       getDownloadPassQR({
         userId: userId,
         userType: "User",
-        userName: userName
+        userName: userName,
       })
         .then((dataUri) => {
           setDownloadPassQR(dataUri);
@@ -111,9 +111,9 @@ export default function Home() {
           attending: false,
           form: {
             age: 0,
-            waiverAgreed: false
-          }
-        }
+            waiverAgreed: false,
+          },
+        },
       });
       setShowDeclineModal(false);
       window.location.reload();
@@ -392,7 +392,7 @@ export default function Home() {
               className="flex gap-4 flex-col"
               style={{
                 width: profile.status.confirmed ? "100%" : "0%",
-                display: profile.status.confirmed ? "flex" : "none"
+                display: profile.status.confirmed ? "flex" : "none",
               }}
             >
               <a
