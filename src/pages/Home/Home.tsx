@@ -7,14 +7,14 @@ import firefly from "../../assets/firefly.svg";
 import Text from "../../components/Text/Text";
 import appleWallet from "../../assets/apple-add-to-wallet.svg";
 import googleWallet from "../../assets/google-add-to-wallet.svg";
-import { Copy } from "lucide-react";
 import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
-import { getDownloadPassQR } from "../../api/client";
+import { getDownloadPassQR, updateRSVP } from "../../api/client";
 import type { Profile } from "../../components/types";
 
 import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
+import Modal from "../../components/Modal/Modal";
 
 async function addToWalletGoogle(profile: Profile) {
   const userId = profile._id;
@@ -66,7 +66,6 @@ async function addToWalletApple(profile: Profile) {
     );
     window.location.href = url;
 
-    // kill after some time
     setTimeout(() => window.URL.revokeObjectURL(url), 5000);
   } catch (err) {
     console.error("Failed to fetch pass:", err);
@@ -82,8 +81,8 @@ export default function Home() {
   const GRASSCOUNT = 40;
   const [downloadPassQR, setDownloadPassQR] = useState("");
   const [downloadPassError, setDownloadPassError] = useState("");
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
 
-  // Load download pass QR code when profile is available
   useEffect(() => {
     const userId = profile?._id;
     const firstName = profile?.firstName;
@@ -105,15 +104,26 @@ export default function Home() {
     }
   }, [profile?._id, profile?.firstName, profile?.lastName]);
 
-  // TEMPORARY TO FORCE CONFIRMED STATUS
-  // useEffect(() => {
-  //   if (profile && !profile.status.confirmed) {
-  //     profile.status.confirmed = true;
-  //   }
-  // }, [profile]);
+  const handleDeclineAttendance = async () => {
+    try {
+      await updateRSVP({
+        rsvp: {
+          attending: false,
+          form: {
+            age: 0,
+            waiverAgreed: false
+          }
+        }
+      });
+      setShowDeclineModal(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to update RSVP:", error);
+    }
+  };
 
   return (
-    <div className="flex sm:gap-0 gap-4 overflow-hidden p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] h-[100vh] w-full flex-col justify-center items-center text-center overflow-x-hidden">
+    <div className="flex sm:gap-0 gap-4 overflow-hidden p-4 sm:p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] min-h-screen w-full flex-col justify-start sm:justify-center items-center text-center overflow-x-hidden">
       <img
         src={cloudSVG}
         alt="Cloud"
@@ -143,7 +153,7 @@ export default function Home() {
         alt="firefly"
         className="absolute w-1/3 top-[5rem] right-[10%] block"
       />
-      <div className="overflow-hidden absolute bottom-0 left-0 w-full flex justify-between items-end">
+      <div className="overflow-hidden fixed bottom-0 left-0 w-full flex justify-between items-end z-0">
         {Array.from({ length: GRASSCOUNT }).map((_, index) => (
           <img
             key={index}
@@ -167,7 +177,7 @@ export default function Home() {
           <Text textType="heading-lg">Loading...</Text>
         </div>
       ) : (
-        <div className="flex flex-col sm:items-start items-center justify-center z-10 w-full max-w-[1150px] mx-auto px-4">
+        <div className="flex flex-col sm:items-start items-center justify-start sm:justify-center z-10 w-full max-w-[1500px] mx-auto px-2 sm:px-4 mt-8 sm:mt-0">
           <Text
             textType="heading-md"
             textColor="primary"
@@ -199,15 +209,25 @@ export default function Home() {
             textColor="primary"
             className="z-[100] mb-4 text-center"
           >
-            <span className="text-[#00786D]">Event Location: YorkU</span>
+            <span className="text-[#00786D]">
+              Event Location:{" "}
+              <a
+                href="https://g.co/kgs/u8YRZBi"
+                className="font-bold underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Accolade East Building @ YorkU
+              </a>
+            </span>
           </Text>
 
-          <div className="flex flex-row w-full h-[68vh] gap-8">
+          <div className="flex flex-col sm:flex-row w-full gap-4 sm:gap-8">
             <div
-              className="flex gap-4 h-full flex-col"
-              style={{ width: profile.status.confirmed ? "70%" : "100%" }}
+              className="flex gap-4 flex-col"
+              style={{ width: profile.status.confirmed ? "100%" : "100%" }}
             >
-              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[22%] rounded-xl py-4 px-6 flex flex-col items-start justify-center">
+              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] min-h-[120px] sm:h-[22%] rounded-xl py-4 px-4 sm:px-6 flex flex-col items-start justify-center">
                 <Text
                   textType="heading-sm"
                   textColor="primary"
@@ -236,52 +256,65 @@ export default function Home() {
                       us know as early as possible.
                     </>
                   ) : (
-                    <>
-                      Sorry to see you go :( Your spot has been given to another
-                      exciting hacker. Hope to see you next year!
-                    </>
+                    <>Sorry to see you go :( Hope to see you next year!</>
                   )}
                 </Text>
               </div>
-              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[40%] rounded-xl py-4 px-6 flex flex-col items-start  justify-center">
-                <Text
-                  textType="heading-sm"
-                  textColor="primary"
-                  textWeight="bold"
-                >
-                  Join Our Discord
-                </Text>
-                <Text
-                  textType="paragraph-sm"
-                  textColor="secondary"
-                  className="mt-1 mb-2 text-justify"
-                >
-                  Join the server to get the latest updates and connect with
-                  fellow hackers, mentors and sponsors!
-                </Text>
-                <div className="flex flex-row w-full gap-4">
-                  <FaDiscord className="text-[#8c9eff] text-[60px]" />
-                  <div className="flex flex-col items-start">
-                    <Text textType="paragraph-lg" textWeight="bold">
-                      <span className="text-[#8c9eff]">DISCORD -&gt;</span>
-                    </Text>
-                    <Text textType="paragraph-sm">
-                      Issue the following command in the #verification channel:
-                    </Text>
+              {profile.status.confirmed && (
+                <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] min-h-[200px] sm:h-[40%] rounded-xl py-4 px-4 sm:px-6 flex flex-col items-start justify-center">
+                  <Text
+                    textType="heading-sm"
+                    textColor="primary"
+                    textWeight="bold"
+                  >
+                    Join Our Discord
+                  </Text>
+                  <Text
+                    textType="paragraph-sm"
+                    textColor="secondary"
+                    className="mt-1 mb-2 text-justify"
+                  >
+                    Join the server to get the latest updates and connect with
+                    fellow hackers, mentors and sponsors!
+                  </Text>
+                  <div
+                    className="flex flex-row w-full gap-4 cursor-pointer"
+                    onClick={() => {
+                      window.open("/discord/link");
+                    }}
+                  >
+                    <FaDiscord className="text-[#8c9eff] text-[40px] sm:text-[60px]" />
+                    <div className="flex flex-col items-start flex-1">
+                      <Text textType="paragraph-lg" textWeight="bold">
+                        <p className="text-[#8c9eff] flex gap-1 items-center">
+                          DISCORD
+                          <ArrowRight className="text-[#8c9eff]" />
+                        </p>
+                      </Text>
+                      <Text
+                        textType="paragraph-sm"
+                        className="text-left mb-2 py-2"
+                      >
+                        Click this button to join the Discord, then follow the
+                        instructions in the{" "}
+                        <span className="bg-[#8c9eff] p-1 rounded-sm text-white">
+                          # ✅-verification
+                        </span>{" "}
+                        channel
+                      </Text>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      window.open("/discord/link");
+                    }}
+                    className="cursor-pointer hover:bg-[#54595950] flex text-[#00786D] flex-row gap-2 h-[40px] items-center justify-center rounded-4xl w-full bg-[#5459592E]"
+                  >
+                    Join Discord
+                  </button>
                 </div>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      "!verify youremail@gmail.com"
-                    );
-                  }}
-                  className="cursor-pointer hover:bg-[#54595950] flex text-[#00786D] flex-row gap-2 h-[40px] items-center justify-center rounded-4xl w-full bg-[#5459592E]"
-                >
-                  !verify youremail@gmail.com <Copy />
-                </button>
-              </div>
-              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[38%] rounded-xl py-4 px-6 flex flex-col items-start  justify-center">
+              )}
+              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] min-h-[200px] sm:h-[38%] rounded-xl py-4 px-4 sm:px-6 flex flex-col items-start justify-center">
                 <Text
                   textType="heading-sm"
                   textColor="primary"
@@ -297,25 +330,28 @@ export default function Home() {
                   Explore these links to learn more about our event this year
                   and get familiar with Hack the 6ix!
                 </Text>
-                <div className="flex flex-row gap-8 w-full justify-center mt-2 items-center">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 w-full justify-center mt-2 items-center">
                   <a
-                    className="flex flex-row gap-2 items-center cursor-pointer"
+                    className="flex flex-row gap-4 items-center cursor-pointer w-full sm:w-auto"
                     href="https://www.notion.so/hackthe6ix/Hack-the-6ix-2025-f03f9b3e42744b48a52c64a180159353"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <img
                       src="/src/assets/notionlogo.png"
-                      className="h-[90px] w-[90px]"
+                      className="h-[60px] w-[60px] sm:h-[90px] sm:w-[90px]"
                     ></img>
-                    <div className="flex flex-col items-start w-[200px]">
+                    <div className="flex flex-col items-start flex-1 sm:w-[200px]">
                       <Text
                         textColor="black"
                         textType="heading-sm"
                         textWeight="bold"
-                        className="text-left"
+                        className="text-left flex items-center gap-1"
                       >
-                        NOTION -&gt;
+                        <span className="flex items-center gap-1">
+                          NOTION
+                          <ArrowRight />
+                        </span>
                       </Text>
                       <Text textType="paragraph-sm" className="text-left">
                         Access our live hacker guide book here!
@@ -323,23 +359,26 @@ export default function Home() {
                     </div>
                   </a>
                   <a
-                    className="flex flex-row gap-2 items-center cursor-pointer"
+                    className="flex flex-row gap-4 items-center cursor-pointer w-full sm:w-auto"
                     href="https://hackthe6ix2025.devpost.com/"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <img
                       src="/src/assets/devpostlogo.png"
-                      className="h-[90px] w-[90px]"
+                      className="h-[60px] w-[60px] sm:h-[90px] sm:w-[90px]"
                     ></img>
-                    <div className="flex flex-col items-start w-[200px]">
+                    <div className="flex flex-col items-start flex-1 sm:w-[200px]">
                       <Text
                         textColor="black"
                         textType="heading-sm"
                         textWeight="bold"
-                        className="text-left"
+                        className="text-left flex items-center gap-1"
                       >
-                        DEVPOST -&gt;
+                        <span className="flex items-center gap-1">
+                          DEVPOST
+                          <ArrowRight />
+                        </span>
                       </Text>
                       <Text textType="paragraph-sm" className="text-left">
                         Submit & share your projects here!
@@ -350,9 +389,9 @@ export default function Home() {
               </div>
             </div>
             <div
-              className="flex gap-4 h-full flex-col"
+              className="flex gap-4 flex-col"
               style={{
-                width: profile.status.confirmed ? "30%" : "0%",
+                width: profile.status.confirmed ? "100%" : "0%",
                 display: profile.status.confirmed ? "flex" : "none"
               }}
             >
@@ -371,88 +410,91 @@ export default function Home() {
                   </span>
                 </Text>
               </a>
-              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] h-[60%] rounded-xl items-center justify-center py-4 px-6 ">
-                <Text
-                  textType="heading-sm"
-                  textColor="primary"
-                  textWeight="bold"
-                >
-                  Download Pass
-                </Text>
-                {downloadPassError ? (
+              <div className="w-full flex flex-col md:flex-row backdrop-blur-sm bg-[#FFFFFF80] min-h-[300px] sm:h-[60%] rounded-xl items-center justify-center py-4 px-4 sm:px-6">
+                <div className="text-left md:w-full w-1/2">
                   <Text
-                    textType="paragraph-lg"
+                    textType="heading-sm"
                     textColor="primary"
                     textWeight="bold"
                   >
-                    <span className="font-bold text-red-500">
-                      {downloadPassError}
-                    </span>
+                    Download Pass
                   </Text>
-                ) : (
-                  <img
-                    src={downloadPassQR}
-                    alt="Your download pass QR code"
-                    className="my-2"
-                    style={{ width: 100, height: 100 }}
-                  />
-                )}
-                {isIOS() && (
-                  <img
-                    src={appleWallet}
-                    alt="Add to Apple Wallet"
-                    className="w-4/5 h-full cursor-pointer"
-                    onClick={async () => {
-                      if (!profile) {
-                        console.error("No profile found");
-                        return;
-                      }
-                      addToWalletApple(profile);
-                    }}
-                  />
-                )}
-                {!isIOS() && (
-                  <img
-                    src={googleWallet}
-                    alt="Add to Google Wallet"
-                    className="w-4/5 h-full cursor-pointer"
-                    onClick={async () => {
-                      if (!profile) {
-                        console.error("No profile found");
-                        return;
-                      }
-                      addToWalletGoogle(profile);
-                    }}
-                  />
-                )}
-                {!downloadPassError && (
+                  {!downloadPassError && (
+                    <Text
+                      textType="paragraph-sm"
+                      textColor="secondary"
+                      className="mt-2"
+                    >
+                      Scan this QR code on mobile to download your event pass
+                    </Text>
+                  )}
                   <Text
                     textType="paragraph-sm"
-                    textColor="secondary"
-                    className="mt-2 text-center"
+                    textColor="primary"
+                    textWeight="bold"
+                    className="mt-1 mb-2 text-center"
                   >
-                    Scan this QR code on mobile to download your event pass
+                    <span className="font-bold">Status: </span>
+                    {profile.status.checkedIn ? (
+                      <span className="text-[#00AC6B] ml-2 bg-[#dbfff2] px-2 py-1 rounded-full">
+                        Checked-in
+                      </span>
+                    ) : (
+                      <span className="text-[#F32E26] ml-2 bg-[#FEF2F2] px-2 py-1 rounded-full">
+                        Not Checked-in
+                      </span>
+                    )}
                   </Text>
-                )}
-                <Text
-                  textType="paragraph-sm"
-                  textColor="primary"
-                  textWeight="bold"
-                  className="mt-1 mb-2 text-center"
-                >
-                  <span className="font-bold">Status: </span>
-                  {profile.status.checkedIn ? (
-                    <span className="text-[#00AC6B] ml-2 bg-[#dbfff2] px-2 py-1 rounded-full">
-                      Checked-in
-                    </span>
+                </div>
+                <div className="w-1/2 md:w-full flex flex-col items-center">
+                  {downloadPassError ? (
+                    <Text
+                      textType="paragraph-lg"
+                      textColor="primary"
+                      textWeight="bold"
+                    >
+                      <span className="font-bold text-red-500">
+                        {downloadPassError}
+                      </span>
+                    </Text>
                   ) : (
-                    <span className="text-[#F32E26] ml-2 bg-[#FEF2F2] px-2 py-1 rounded-full">
-                      Not Checked-in
-                    </span>
+                    <img
+                      src={downloadPassQR}
+                      alt="Your download pass QR code"
+                      className="my-2 max-w-[150px]"
+                    />
                   )}
-                </Text>
+                  {isIOS() && (
+                    <img
+                      src={appleWallet}
+                      alt="Add to Apple Wallet"
+                      className="h-10 cursor-pointer"
+                      onClick={async () => {
+                        if (!profile) {
+                          console.error("No profile found");
+                          return;
+                        }
+                        addToWalletApple(profile);
+                      }}
+                    />
+                  )}
+                  {!isIOS() && (
+                    <img
+                      src={googleWallet}
+                      alt="Add to Google Wallet"
+                      className="h-10 cursor-pointer"
+                      onClick={async () => {
+                        if (!profile) {
+                          console.error("No profile found");
+                          return;
+                        }
+                        addToWalletGoogle(profile);
+                      }}
+                    />
+                  )}
+                </div>
               </div>
-              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[40%] rounded-xl py-4 px-6 flex flex-col justify-center ">
+              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] min-h-[150px] sm:h-[40%] rounded-xl py-4 px-4 sm:px-6 flex flex-col justify-center">
                 <Text
                   textType="paragraph-lg"
                   textColor="primary"
@@ -468,7 +510,10 @@ export default function Home() {
                   If you can no longer attend, please let us know so we can pass
                   this opportunity to a waitlisted hacker.
                 </Text>
-                <button className="w-full hover:bg-[#f5cecb] rounded-lg border-1 border-[#E42027] bg-white px-4 py-2">
+                <button
+                  onClick={() => setShowDeclineModal(true)}
+                  className="w-full hover:bg-[#f5cecb] rounded-lg border-1 border-[#E42027] bg-white px-4 py-2"
+                >
                   <Text textType="paragraph-sm">
                     <span className="font-bold text-[#E42027]">
                       I can no longer attend
@@ -480,6 +525,34 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <Modal open={showDeclineModal} onClose={() => setShowDeclineModal(false)}>
+        <div className="flex flex-col gap-4">
+          <Text textType="heading-sm" textColor="primary" textWeight="bold">
+            Confirm Attendance Decline
+          </Text>
+          <Text textType="paragraph-sm" textColor="secondary">
+            Are you sure you can no longer attend? This action cannot be undone
+            and your spot will be given to another hacker.
+          </Text>
+          <div className="flex gap-3 justify-center mt-4">
+            <button
+              onClick={() => setShowDeclineModal(false)}
+              className="px-6 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+            >
+              <Text textType="paragraph-sm">Cancel</Text>
+            </button>
+            <button
+              onClick={handleDeclineAttendance}
+              className="px-6 py-2 rounded-lg bg-[#E42027] hover:bg-[#c41e24] text-white"
+            >
+              <Text textType="paragraph-sm" textColor="white">
+                Confirm
+              </Text>
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

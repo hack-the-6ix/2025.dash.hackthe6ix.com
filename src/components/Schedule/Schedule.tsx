@@ -103,7 +103,6 @@ export default function EventsList() {
     return () => clearInterval(timer);
   }, [date, earliestHour, latestHour, HOURS, getRowStart]);
 
-  if (loading) return <p>Loading events…</p>;
   if (error) return <p className="text-red-600">Error: {error}</p>;
 
   const filtered = events.filter((ev) =>
@@ -131,131 +130,162 @@ export default function EventsList() {
   );
 
   return (
-    <div className="w-full">
-      <div className="flex mb-4">
-        {EVENTDATES.map((d) => (
-          <div
-            key={d}
-            className="flex-1 text-center cursor-pointer"
-            onClick={() => setDate(d)}
-            style={{
-              borderBottom: `${date === d ? "3px #F47F1F" : "1px black"} solid`
-            }}
-          >
-            <Text textType="paragraph-lg" textColor="primary" className="py-3">
-              <span
-                style={{
-                  color: date === d ? "#F47F1F" : "#08566B",
-                  fontWeight: date === d ? 600 : 400
-                }}
-              >
-                {format(parseDate(d), "EEE. MMM d")}
-              </span>
-            </Text>
-          </div>
-        ))}
-      </div>
-
-      <div
-        className="flex items-center gap-2 mb-2 cursor-pointer"
-        onClick={() => setFilterOpen((o) => !o)}
-      >
-        <Text textType="paragraph-sm" textColor="primary">
-          Filter by type
-        </Text>
-        {filterOpen ? <ChevronUp /> : <ChevronDown />}
-      </div>
-      {filterOpen && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          <button
-            onClick={() => setFilterItem("")}
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              filterItem === ""
-                ? "bg-[#F47F1F] text-white"
-                : "bg-white text-black"
-            }`}
-          >
-            All
-          </button>
-          {types.map((type) => {
-            const isActive = filterItem === type;
-            return (
-              <button
-                key={type}
-                onClick={() => setFilterItem(type)}
-                className={`px-3 rounded-full text-sm font-medium text-white
-                }`}
-                style={{
-                  backgroundColor: isActive ? "#F47F1F" : TYPE_BORDER[type]
-                }}
-              >
-                {type}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      <div
-        className="relative grid grid-cols-[80px_1fr] gap-[1px] w-full"
-        style={{ gridTemplateRows: `repeat(${TOTAL_SLOTS}, ${SLOT_HEIGHT}px)` }}
-      >
-        {HOURS.map((h, i) => (
-          <div
-            key={h}
-            className="text-left text-sm text-[#08566B] font-bold"
-            style={{
-              gridColumn: 1,
-              gridRow: `${i * PERIODS_PER_HOUR + 1} / span ${PERIODS_PER_HOUR}`
-            }}
-          >
-            {h < 12 ? `${h} AM` : h === 12 ? "12 PM" : `${h - 12} PM`}
-          </div>
-        ))}
-
-        {sorted.map(({ id, fields }) => {
-          const startRow = getRowStart(fields.Start);
-          const span = getRowSpan(fields.Start, fields.End);
-          const { count, index } = overlapInfo[id];
-          const slotWidth = Math.max(100 / count, 40);
-          const leftOffset = index * slotWidth;
-          return (
+    <div className="w-full h-full flex flex-col">
+      <div className="sticky top-0 bg-transparent z-10">
+        <div className="flex mb-4">
+          {EVENTDATES.map((d) => (
             <div
-              onClick={() => setSelected(fields)}
-              key={id}
-              className="px-1"
+              key={d}
+              className="flex-1 text-center cursor-pointer"
+              onClick={() => setDate(d)}
               style={{
-                gridColumn: 2,
-                gridRow: `${startRow} / span ${span}`,
-                width: `${slotWidth}%`,
-                marginLeft: `${leftOffset}%`
+                borderBottom: `${date === d ? "3px #F47F1F" : "1px black"} solid`
               }}
             >
-              <Event
-                type={fields.Type}
-                name={fields.Name}
-                start={fields.Start}
-                end={fields.End}
-                location={fields.Location ?? "TBD"}
-                description={fields.Description}
-                height={
-                  fields.Name == "Hacking Begins"
-                    ? 8 * SLOT_HEIGHT + "px"
-                    : span * SLOT_HEIGHT + "px"
-                }
-              />
+              <Text
+                textType="paragraph-lg"
+                textColor="primary"
+                className="py-3 sm:text-base text-sm"
+              >
+                <span
+                  style={{
+                    color: date === d ? "#F47F1F" : "#08566B",
+                    fontWeight: date === d ? 600 : 400
+                  }}
+                >
+                  {format(parseDate(d), "EEE. MMM d")}
+                </span>
+              </Text>
             </div>
-          );
-        })}
-        {nowRow && (
-          <div
-            className="absolute left-[80px] right-0 flex items-center pointer-events-none w-full"
-            style={{ gridRow: `${nowRow} / span 1` }}
-          >
-            <div className="w-[12px] h-[12px] bg-red-500 rounded-full" />
-            <div className="flex-1 h-[3px] w-full bg-red-500" />
+          ))}
+        </div>
+
+        <div
+          className="flex items-center gap-2 mb-2 cursor-pointer"
+          onClick={() => setFilterOpen((o) => !o)}
+        >
+          <Text textType="paragraph-sm" textColor="primary">
+            Filter by type
+          </Text>
+          {filterOpen ? <ChevronUp /> : <ChevronDown />}
+        </div>
+        {filterOpen && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            <button
+              onClick={() => setFilterItem("")}
+              className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-opacity duration-200 hover:opacity-75 ${
+                filterItem === ""
+                  ? "bg-[#F47F1F] text-white"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              All
+            </button>
+            {types.map((type) => {
+              const isActive = filterItem === type;
+              return (
+                <button
+                  key={type}
+                  onClick={() => setFilterItem(type)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-opacity duration-200 hover:opacity-75 ${
+                    isActive ? "text-white" : "text-gray-600"
+                  }`}
+                  style={{
+                    backgroundColor: isActive ? "#F47F1F" : "transparent",
+                    border: `2px solid ${TYPE_BORDER[type]}`
+                  }}
+                >
+                  {type}
+                </button>
+              );
+            })}
           </div>
         )}
+      </div>
+
+      <div className="flex flex-1 overflow-auto">
+        <div
+          className="relative grid grid-cols-[60px] sm:grid-cols-[80px] gap-[1px] flex-shrink-0"
+          style={{
+            gridTemplateRows: `repeat(${TOTAL_SLOTS}, ${SLOT_HEIGHT}px)`,
+            minHeight: `${TOTAL_SLOTS * SLOT_HEIGHT}px`
+          }}
+        >
+          {HOURS.map((h, i) => (
+            <div
+              key={h}
+              className="text-left text-xs sm:text-sm text-[#08566B] font-bold"
+              style={{
+                gridColumn: 1,
+                gridRow: `${i * PERIODS_PER_HOUR + 1} / span ${PERIODS_PER_HOUR}`
+              }}
+            >
+              {h === 0
+                ? "12 AM"
+                : h < 12
+                  ? `${h} AM`
+                  : h === 12
+                    ? "12 PM"
+                    : `${h - 12} PM`}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex-1">
+          <div
+            className="relative grid grid-cols-[1fr] gap-[1px] min-w-[320px] sm:min-w-[720px]"
+            style={{
+              gridTemplateRows: `repeat(${TOTAL_SLOTS}, ${SLOT_HEIGHT}px)`,
+              minHeight: `${TOTAL_SLOTS * SLOT_HEIGHT}px`
+            }}
+          >
+            {!loading &&
+              sorted.map(({ id, fields }) => {
+                const startRow = getRowStart(fields.Start);
+                const span = getRowSpan(fields.Start, fields.End);
+                const { count, index } = overlapInfo[id];
+                const slotWidth = Math.max(100 / count, 40);
+                const leftOffset = index * slotWidth;
+                return (
+                  <div
+                    onClick={() => setSelected(fields)}
+                    key={id}
+                    className="px-1 cursor-pointer hover:opacity-75 transition-opacity duration-200"
+                    style={{
+                      gridColumn: 1,
+                      gridRow: `${startRow} / span ${span}`,
+                      width: `${slotWidth}%`,
+                      marginLeft: `${leftOffset}%`
+                    }}
+                  >
+                    <Event
+                      type={fields.Type}
+                      name={fields.Name}
+                      start={fields.Start}
+                      end={fields.End}
+                      location={fields.Location ?? "TBD"}
+                      description={fields.Description}
+                      height={
+                        fields.Name == "Hacking Begins"
+                          ? 8 * SLOT_HEIGHT + "px"
+                          : span * SLOT_HEIGHT + "px"
+                      }
+                    />
+                  </div>
+                );
+              })}
+
+            {nowRow && (
+              <div
+                className="absolute left-0 right-0 flex items-center pointer-events-none w-full"
+                style={{ gridRow: `${nowRow} / span 1` }}
+              >
+                <div className="w-[12px] h-[12px] bg-red-500 rounded-full" />
+                <div className="flex-1 h-[3px] w-full bg-red-500" />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {selected && (

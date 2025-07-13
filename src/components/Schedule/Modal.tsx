@@ -23,7 +23,7 @@ const TYPE_BORDER: Record<string, string> = {
   Ceremonies: "#0A7837",
   Activities: "#0dc6de",
   Food: "#edc009",
-  Workshops: "#E42027",
+  Workshops: "#E42027"
 };
 
 export default function Modal({
@@ -34,7 +34,7 @@ export default function Modal({
   date,
   end,
   description,
-  onClose,
+  onClose
 }: EventProps) {
   const parseTime = (iso: string) => new Date(iso.replace(/Z$/, ""));
   const parseDate = (isoDate: string) => {
@@ -45,11 +45,11 @@ export default function Modal({
   const borderColor = TYPE_BORDER[type] || "border-gray-400";
   const startTime = parseTime(start).toLocaleTimeString([], {
     hour: "numeric",
-    minute: "2-digit",
+    minute: "2-digit"
   });
   const endTime = parseTime(end).toLocaleTimeString([], {
     hour: "numeric",
-    minute: "2-digit",
+    minute: "2-digit"
   });
   const eventDate = parseDate(date);
 
@@ -73,7 +73,7 @@ export default function Modal({
       `DESCRIPTION:${description || ""}`,
       `LOCATION:${location}`,
       "END:VEVENT",
-      "END:VCALENDAR",
+      "END:VCALENDAR"
     ].join("\r\n");
     const blob = new Blob([lines], { type: "text/calendar" });
     const url = URL.createObjectURL(blob);
@@ -84,9 +84,9 @@ export default function Modal({
   }, [name, start, end, location, description]);
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
-        className="bg-white rounded-xl w-full max-w-lg p-6 relative flex flex-col items-start"
+        className="bg-white rounded-xl w-full max-w-lg p-4 sm:p-6 relative flex flex-col items-start max-h-[90vh] overflow-y-auto"
         style={{ boxShadow: `0 4px 16px rgba(0,0,0,0.2)` }}
       >
         <button
@@ -100,7 +100,7 @@ export default function Modal({
           textType="heading-lg"
           textColor="primary"
           textWeight="bold"
-          className="text-left"
+          className="text-left pr-8"
         >
           {name}
         </Text>
@@ -144,7 +144,7 @@ export default function Modal({
         </div>
 
         <div className="mt-4 w-full text-[#08566B] font-semibold">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <a
               href={googleLink()}
               target="_blank"
@@ -165,7 +165,7 @@ export default function Modal({
             <a
               href={icsUrl}
               download={`${name}.ics`}
-              className="flex gap-3 items-center justify-center col-span-2 px-3 py-2 border rounded-full hover:bg-gray-100"
+              className="flex gap-3 items-center justify-center col-span-1 sm:col-span-2 px-3 py-2 border rounded-full hover:bg-gray-100"
             >
               <PiMicrosoftOutlookLogoFill size={16} />
               Outlook

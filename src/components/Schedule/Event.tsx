@@ -48,9 +48,12 @@ export default function Event({
         w-full
         relative
         rounded-lg
-        py-3
-        pl-6
-        pr-2
+        py-2
+        sm:py-3
+        pl-4
+        sm:pl-6
+        pr-1
+        sm:pr-2
         items-start
         justify-start
         flex flex-col "
@@ -60,7 +63,7 @@ export default function Event({
       }}
     >
       <div
-        className="h-full absolute top-0 left-0 w-[15px]"
+        className="h-full absolute top-0 left-0 w-[12px] sm:w-[15px]"
         style={{ background: borderColor }}
       ></div>
       <Text
@@ -68,7 +71,7 @@ export default function Event({
         textColor={type == "Announcements" ? "white" : "primary"}
         className="text-left"
       >
-        <span className="font-semibold text-left">
+        <span className="font-semibold text-left text-[14px] md:text-sm">
           {displayName.toUpperCase()}
         </span>
       </Text>
@@ -78,7 +81,7 @@ export default function Event({
         textColor={type == "Announcements" ? "white" : "primary"}
         className="mt-1 text-left"
       >
-        <span className="font-light text-left">
+        <span className="font-light text-left text-[12px] md:text-sm">
           {startTime} – {endTime} @ {location}
         </span>
       </Text>

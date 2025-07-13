@@ -8,6 +8,77 @@ import Text from "../../components/Text/Text";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import EventsList from "../../components/Schedule/Schedule";
+import { useState, useEffect } from "react";
+
+function CountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      const hackingStarts = new Date("2025-07-18T22:00:00");
+      const hackingEnds = new Date("2025-07-20T09:30:00");
+      const hackingEndsExtended = new Date("2025-07-20T10:00:00");
+
+      if (now < hackingStarts) {
+        const diff = hackingStarts.getTime() - now.getTime();
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+        setTimeLeft(`${days} days, ${hours} hours, ${minutes} minutes`);
+        setMessage("hacking starts");
+      } else if (now < hackingEnds) {
+        const diff = hackingEnds.getTime() - now.getTime();
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+        setTimeLeft(`${hours} hours, ${minutes} minutes`);
+        setMessage("hacking ends");
+      } else if (now < hackingEndsExtended) {
+        const diff = hackingEndsExtended.getTime() - now.getTime();
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+        setTimeLeft(`${hours} hours, ${minutes} minutes`);
+        setMessage("hacking ends");
+      } else {
+        setTimeLeft("");
+        setMessage("hacking has ended");
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <Text
+      textType="paragraph-lg"
+      textColor="black"
+      className="text-center mb-6 mt-4 px-4 sm:px-0"
+    >
+      {timeLeft && message !== "hacking has ended" ? (
+        <>
+          There are {timeLeft} left until {message}. Click on each block for
+          more details about each workshop.
+        </>
+      ) : message === "hacking has ended" ? (
+        <>
+          Hacking has ended. Click on each block for more details about each
+          workshop.
+        </>
+      ) : (
+        <>Click on each block for more details about each workshop.</>
+      )}
+    </Text>
+  );
+}
 
 export default function Schedule() {
   const { profile } = useAuth();
@@ -22,7 +93,7 @@ export default function Schedule() {
   ];
 
   return (
-    <div className="sm:gap-0 gap-4 overflow-hidden p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] h-[100vh] w-full flex flex-col justify-center items-center text-center overflow-x-hidden">
+    <div className="sm:gap-0 gap-4 overflow-y-auto sm:overflow-hidden p-4 sm:p-8 bg-linear-to-b from-[#ACDCFD] via-[#B3E9FC] to-[#B9F2FC] min-h-screen sm:h-screen w-full flex flex-col justify-start sm:justify-center items-center text-center overflow-x-hidden">
       <img
         src={cloudSVG}
         alt="Cloud"
@@ -52,7 +123,7 @@ export default function Schedule() {
         alt="firefly"
         className="absolute w-1/3 top-[5rem] right-[10%] block"
       />
-      <div className="overflow-hidden absolute bottom-0 left-0 w-full flex justify-between items-end">
+      <div className="overflow-hidden fixed bottom-0 left-0 w-full flex justify-between items-end z-10">
         {Array.from({ length: GRASSCOUNT }).map((_, index) => (
           <img
             key={index}
@@ -72,30 +143,23 @@ export default function Schedule() {
       </div>
 
       {!profile ? (
-        <div>
+        <div className="mt-20 sm:mt-0">
           <Text textType="heading-lg">Loading...</Text>
         </div>
       ) : profile.status.confirmed ? (
-        <div className="flex flex-col sm:items-start items-center justify-center z-10 w-full max-w-[1150px] mx-auto px-4">
+        <div className="flex flex-col sm:items-start items-center justify-start sm:justify-center z-10 w-full max-w-[2000px] mx-auto px-2 sm:px-4 mt-20 sm:mt-0">
           <Text textType="display" textColor="primary" className="text-center">
             Event Schedule
           </Text>
-          <Text
-            textType="paragraph-lg"
-            textColor="black"
-            className="text-center mb-6 mt-4"
-          >
-            There are [x days] left until the hackathon begins. Click on each
-            block for more details about each workshop.
-          </Text>
+          <CountdownTimer />
 
-          <div className="h-full flex flex-row w-full gap-8">
-            <div className="flex gap-4 flex-col w-[75%]">
-              <div className="overflow-scroll w-full backdrop-blur-sm bg-[#FFFFFF80] h-[70vh] rounded-xl py-4 px-6 flex flex-col items-start justify-start">
+          <div className="flex flex-col sm:flex-row w-full gap-4 sm:gap-8">
+            <div className="flex gap-4 flex-col w-full sm:w-[75%]">
+              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[60vh] sm:h-[70vh] rounded-xl py-4 px-3 sm:px-6 flex flex-col items-start justify-start">
                 <EventsList />
               </div>
             </div>
-            <div className="flex gap-4 h-full flex-col w-[25%]">
+            <div className="flex gap-4 flex-col w-full sm:w-[25%] mb-8 sm:mb-0">
               <a
                 href="/"
                 className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center"
@@ -111,7 +175,7 @@ export default function Schedule() {
                   </span>
                 </Text>
               </a>
-              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] rounded-xl items-start justify-center p-6">
+              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] rounded-xl items-start justify-center p-4 sm:p-6">
                 <Text
                   textType="heading-sm"
                   textColor="primary"
@@ -140,7 +204,7 @@ export default function Schedule() {
           </div>
         </div>
       ) : (
-        <div>
+        <div className="mt-20 sm:mt-0">
           <Text textType="heading-lg">
             You do not have permission to view this page...
           </Text>
