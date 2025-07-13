@@ -10,7 +10,7 @@ interface FileUploadProps {
 const FileUpload: React.FC<FileUploadProps> = ({
   onChange,
   value,
-  accept = ".pdf,.doc,.docx"
+  accept = ".pdf,.doc,.docx",
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -53,7 +53,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       style={{
         background: isDragOver ? "#e6f7f6" : "#fff",
         border: "2px dashed #00887E",
-        color: "#00887E"
+        color: "#00887E",
       }}
     >
       <input

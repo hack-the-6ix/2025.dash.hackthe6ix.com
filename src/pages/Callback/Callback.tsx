@@ -1,16 +1,16 @@
-import grassSVG from "../assets/grass.svg";
-import tree1SVG from "../assets/tree1.svg";
-import cloudSVG from "../assets/cloudsLaptop.svg";
-import cloudPhoneSVG from "../assets/cloudsPhone.svg";
-import cloudMiddle from "../assets/cloudMiddle.svg";
-import firefly from "../assets/firefly.svg";
-import Text from "../components/Text/Text";
+import grassSVG from "../../assets/grass.svg";
+import tree1SVG from "../../assets/tree1.svg";
+import cloudSVG from "../../assets/cloudsLaptop.svg";
+import cloudPhoneSVG from "../../assets/cloudsPhone.svg";
+import cloudMiddle from "../../assets/cloudMiddle.svg";
+import firefly from "../../assets/firefly.svg";
+import Text from "../../components/Text/Text";
 
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchHt6 } from "../api/client";
-import type { AuthResponse, CallbackPayload } from "../components/types";
-import { useAuth } from "../contexts/AuthContext";
+import { fetchHt6 } from "../../api/client";
+import type { AuthResponse, CallbackPayload } from "../../components/types";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Callback() {
   const [searchParams] = useSearchParams();
@@ -33,10 +33,10 @@ export default function Callback() {
           "/auth/dash-backend/callback",
           {
             method: "POST",
-            body: { state: state || "", code: code || "" }
-          }
+            body: { state: state || "", code: code || "" },
+          },
         );
-        
+
         if (
           response.status === 200 &&
           response.message.token &&
@@ -44,7 +44,7 @@ export default function Callback() {
         ) {
           localStorage.setItem("token", response.message.token);
           localStorage.setItem("refreshToken", response.message.refreshToken);
-          
+
           // Clear redirect tracking on successful authentication
           sessionStorage.removeItem("auth_redirects");
 

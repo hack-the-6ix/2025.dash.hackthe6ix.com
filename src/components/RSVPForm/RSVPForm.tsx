@@ -12,7 +12,7 @@ interface RSVPFormProps {
 export default function RSVPForm({
   onSubmit,
   onCancel,
-  loading = false
+  loading = false,
 }: RSVPFormProps) {
   const { profile } = useAuth();
   const [age, setAge] = useState("");
@@ -65,7 +65,7 @@ export default function RSVPForm({
       const res = await fetch(`${baseUrl}/api/action/updateWaiver`, {
         method: "PUT",
         headers: token ? { "X-Access-Token": token } : {},
-        body: formData
+        body: formData,
       });
       if (!res.ok) {
         throw new Error("Failed to upload file");
