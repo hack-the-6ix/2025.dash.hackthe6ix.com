@@ -5,12 +5,9 @@ import cloudPhoneSVG from "../../assets/cloudsPhone.svg";
 import cloudMiddle from "../../assets/cloudMiddle.svg";
 import firefly from "../../assets/firefly.svg";
 import Text from "../../components/Text/Text";
-import appleWallet from "../../assets/apple-add-to-wallet.svg";
-import googleWallet from "../../assets/google-add-to-wallet.svg";
 import { FaDiscord } from "react-icons/fa";
 import { ArrowRight } from "lucide-react";
-import { getDownloadPassQR, updateRSVP } from "../../api/client";
-import type { Profile } from "../../components/types";
+import { updateRSVP } from "../../api/client";
 import notionlogo from "../../assets/notionlogo.png";
 import devpostlogo from "../../assets/devpostlogo.png";
 
@@ -18,93 +15,31 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import Modal from "../../components/Modal/Modal";
 
-async function addToWalletGoogle(profile: Profile) {
-  const userId = profile._id;
-  const userType = "User";
-  const userName = `${profile.firstName} ${profile.lastName}`;
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/google/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`,
-      {
-        method: "GET",
-        headers: {
-          "ngrok-skip-browser-warning": "true"
-        }
-      }
-    );
-    const data = await res.json();
-    console.log(data);
-    window.open(data.saveUrl, "_blank");
-  } catch (err) {
-    console.error("Failed to fetch pass:", err);
-  }
-}
-
-async function addToWalletApple(profile: Profile) {
-  const userId = profile._id;
-  const userType = "User";
-  const userName = `${profile.firstName} ${profile.lastName}`;
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/passes/apple/hackathon.pkpass?userId=${userId}&userType=${userType}&userName=${userName}`,
-      {
-        method: "GET",
-        headers: {
-          "ngrok-skip-browser-warning": "true"
-        }
-      }
-    );
-    if (!res.ok) {
-      console.error("Failed to fetch pass");
-      console.log(res);
-      return;
-    }
-    const blob = await res.blob();
-
-    const url = window.URL.createObjectURL(
-      new Blob([blob], {
-        type: "application/vnd.apple.pkpass"
-      })
-    );
-    window.location.href = url;
-
-    setTimeout(() => window.URL.revokeObjectURL(url), 5000);
-  } catch (err) {
-    console.error("Failed to fetch pass:", err);
-  }
-}
-
-const isIOS = () => {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent);
-};
-
 export default function Home() {
   const { profile } = useAuth();
   const GRASSCOUNT = 40;
-  const [downloadPassQR, setDownloadPassQR] = useState("");
-  const [downloadPassError, setDownloadPassError] = useState("");
+  const [qrCode, setQrCode] = useState("");
+  const [qrError, setQrError] = useState("");
   const [showDeclineModal, setShowDeclineModal] = useState(false);
 
   useEffect(() => {
-    const userId = profile?._id;
-    const firstName = profile?.firstName;
-    const lastName = profile?.lastName;
-    if (userId) {
-      const userName = `${firstName} ${lastName}`;
-      getDownloadPassQR({
-        userId: userId,
-        userType: "User",
-        userName: userName
-      })
-        .then((dataUri) => {
-          setDownloadPassQR(dataUri);
-        })
-        .catch((e: unknown) => {
-          console.error(e);
-          setDownloadPassError("Failed to load download pass QR code");
+    async function fetchQr() {
+      try {
+        const token = localStorage.getItem("token");
+        const baseUrl =
+          import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com";
+        const res = await fetch(`${baseUrl}/api/action/checkInQR`, {
+          method: "GET",
+          headers: token ? { "X-Access-Token": token } : {}
         });
+        const data = await res.json();
+        setQrCode(data.message);
+      } catch (e) {
+        setQrError(`Failed to load check-in QR code ${e}`);
+      }
     }
-  }, [profile?._id, profile?.firstName, profile?.lastName]);
+    fetchQr();
+  }, []);
 
   const handleDeclineAttendance = async () => {
     try {
@@ -419,15 +354,15 @@ export default function Home() {
                     textColor="primary"
                     textWeight="bold"
                   >
-                    Download Pass
+                    Event Ticket
                   </Text>
-                  {!downloadPassError && (
+                  {!qrError && (
                     <Text
                       textType="paragraph-sm"
                       textColor="secondary"
                       className="mt-2"
                     >
-                      Scan this QR code on mobile to download your event pass
+                      Show this ticket to our organizers at check-in
                     </Text>
                   )}
                   <Text
@@ -449,49 +384,19 @@ export default function Home() {
                   </Text>
                 </div>
                 <div className="w-1/2 md:w-full flex flex-col items-center">
-                  {downloadPassError ? (
+                  {qrError ? (
                     <Text
                       textType="paragraph-lg"
                       textColor="primary"
                       textWeight="bold"
                     >
-                      <span className="font-bold text-red-500">
-                        {downloadPassError}
-                      </span>
+                      <span className="font-bold text-red-500">{qrError}</span>
                     </Text>
                   ) : (
                     <img
-                      src={downloadPassQR}
-                      alt="Your download pass QR code"
+                      src={qrCode}
+                      alt="Your check-in QR code"
                       className="my-2 max-w-[150px]"
-                    />
-                  )}
-                  {isIOS() && (
-                    <img
-                      src={appleWallet}
-                      alt="Add to Apple Wallet"
-                      className="h-10 cursor-pointer"
-                      onClick={async () => {
-                        if (!profile) {
-                          console.error("No profile found");
-                          return;
-                        }
-                        addToWalletApple(profile);
-                      }}
-                    />
-                  )}
-                  {!isIOS() && (
-                    <img
-                      src={googleWallet}
-                      alt="Add to Google Wallet"
-                      className="h-10 cursor-pointer"
-                      onClick={async () => {
-                        if (!profile) {
-                          console.error("No profile found");
-                          return;
-                        }
-                        addToWalletGoogle(profile);
-                      }}
                     />
                   )}
                 </div>

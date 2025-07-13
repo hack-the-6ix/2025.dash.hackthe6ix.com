@@ -1,5 +1,3 @@
-import type { PassUserInformation } from "../components/types";
-
 export interface ApiResponse<Data> {
   status: number;
   message: Data;
@@ -20,11 +18,11 @@ export interface RSVPResponse {
 
 export async function fetchHt6<T, P = undefined>(
   path: string,
-  options: { body?: P; method?: string } = {},
+  options: { body?: P; method?: string } = {}
 ): Promise<T> {
   const token = localStorage.getItem("token");
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    "Content-Type": "application/json"
   };
   if (token) {
     headers["X-Access-Token"] = token;
@@ -32,7 +30,7 @@ export async function fetchHt6<T, P = undefined>(
 
   const fetchOptions: RequestInit = {
     method: options.method || "GET",
-    headers,
+    headers
   };
 
   if (options.body) {
@@ -53,30 +51,14 @@ export async function updateRSVP(data: {
 }): Promise<RSVPResponse> {
   return fetchHt6<RSVPResponse, { rsvp: RSVPRequest }>("/api/action/rsvp", {
     method: "POST",
-    body: data,
+    body: data
   });
 }
 
 export async function getCheckinQR(): Promise<string> {
   const { message } = await fetchHt6<ApiResponse<string>>(
     "/api/action/checkInQR",
-    { method: "GET" },
+    { method: "GET" }
   );
   return message;
-}
-
-export async function getDownloadPassQR(
-  userInfo: PassUserInformation,
-): Promise<string> {
-  const res = await fetch(
-    `${import.meta.env.VITE_DEV_API_URL || "https://api.hackthe6ix.com"}/api/action/downloadPassQR?userId=${userInfo.userId}&userType=${userInfo.userType}&userName=${userInfo.userName}`,
-    {
-      method: "GET",
-      headers: {
-        "ngrok-skip-browser-warning": "true",
-      },
-    },
-  );
-  const data = await res.json();
-  return data.message;
 }

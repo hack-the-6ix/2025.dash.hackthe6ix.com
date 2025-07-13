@@ -1,6 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home/Home";
-import DownloadPass from "./pages/DownloadPass/DownloadPass";
 import { AuthProvider } from "./contexts/AuthContext";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { checkAuth, type AuthResult } from "./auth/middleware";
@@ -76,7 +75,6 @@ function AppContent() {
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/" element={<Home />} />
         <Route path="/callback" element={<Callback />} />
-        <Route path="/download-pass" element={<DownloadPass />} />
         <Route path="/discord">
           <Route path="callback" element={<DiscordCallback />} />
           <Route path="link" element={<DiscordLink />} />

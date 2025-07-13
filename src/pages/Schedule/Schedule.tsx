@@ -6,7 +6,6 @@ import cloudMiddle from "../../assets/cloudMiddle.svg";
 import firefly from "../../assets/firefly.svg";
 import Text from "../../components/Text/Text";
 import { ArrowRight } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
 import EventsList from "../../components/Schedule/EventsList";
 import { useState, useEffect } from "react";
 
@@ -81,7 +80,6 @@ function CountdownTimer() {
 }
 
 export default function Schedule() {
-  const { profile } = useAuth();
   const GRASSCOUNT = 40;
   const legendItems = [
     { color: "#445EBA", label: "Announcements" },
