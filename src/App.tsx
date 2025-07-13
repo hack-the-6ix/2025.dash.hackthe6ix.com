@@ -43,8 +43,11 @@ function AppContent() {
   }, [location.pathname, performAuthentication]);
 
   useEffect(() => {
-    // Don't run auth check if we're on the callback page - let Callback component handle it
-    if (location.pathname === "/callback") {
+    // Don't run auth check if we're on the callback page or schedule page - let those components handle it
+    if (
+      location.pathname === "/callback" ||
+      location.pathname === "/schedule"
+    ) {
       return;
     }
 

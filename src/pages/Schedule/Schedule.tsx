@@ -7,7 +7,7 @@ import firefly from "../../assets/firefly.svg";
 import Text from "../../components/Text/Text";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import EventsList from "../../components/Schedule/Schedule";
+import EventsList from "../../components/Schedule/EventsList";
 import { useState, useEffect } from "react";
 
 function CountdownTimer() {
@@ -25,7 +25,7 @@ function CountdownTimer() {
         const diff = hackingStarts.getTime() - now.getTime();
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
-          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
         );
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -89,7 +89,7 @@ export default function Schedule() {
     { color: "#0A7837", label: "Ceremonies" },
     { color: "#E42027", label: "Workshops" },
     { color: "#0dc6de", label: "Activities" },
-    { color: "#edc009", label: "Food" },
+    { color: "#edc009", label: "Food" }
   ];
 
   return (
@@ -142,74 +142,58 @@ export default function Schedule() {
         />
       </div>
 
-      {!profile ? (
-        <div className="mt-20 sm:mt-0">
-          <Text textType="heading-lg">Loading...</Text>
-        </div>
-      ) : profile.status.confirmed ? (
-        <div className="flex flex-col sm:items-start items-center justify-start sm:justify-center z-10 w-full max-w-[2000px] mx-auto px-2 sm:px-4 mt-20 sm:mt-0">
-          <Text textType="display" textColor="primary" className="text-center">
-            Event Schedule
-          </Text>
-          <CountdownTimer />
+      <div className="flex flex-col sm:items-start items-center justify-start sm:justify-center z-10 w-full max-w-[2000px] mx-auto px-2 sm:px-4 mt-20 sm:mt-0">
+        <Text textType="display" textColor="primary" className="text-center">
+          Event Schedule
+        </Text>
+        <CountdownTimer />
 
-          <div className="flex flex-col sm:flex-row w-full gap-4 sm:gap-8">
-            <div className="flex gap-4 flex-col w-full sm:w-[75%]">
-              <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[60vh] sm:h-[70vh] rounded-xl py-4 px-3 sm:px-6 flex flex-col items-start justify-start">
-                <EventsList />
-              </div>
+        <div className="flex flex-col sm:flex-row w-full gap-4 sm:gap-8">
+          <div className="flex gap-4 flex-col w-full sm:w-[75%]">
+            <div className="w-full backdrop-blur-sm bg-[#FFFFFF80] h-[60vh] sm:h-[70vh] rounded-xl py-4 px-3 sm:px-6 flex flex-col items-start justify-start">
+              <EventsList />
             </div>
-            <div className="flex gap-4 flex-col w-full sm:w-[25%] mb-8 sm:mb-0">
-              <a
-                href="/"
-                className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center"
+          </div>
+          <div className="flex gap-4 flex-col w-full sm:w-[25%] mb-8 sm:mb-0">
+            <a
+              href="/"
+              className="w-full h-[50px] rounded-xl bg-[#1C6981] hover:bg-[#134b5c] shadow-lg flex items-center justify-center"
+            >
+              <Text
+                textType="paragraph-sm"
+                textColor="white"
+                className="cursor-pointer text-center"
+                textWeight="bold"
               >
-                <Text
-                  textType="paragraph-sm"
-                  textColor="white"
-                  className="cursor-pointer text-center"
-                  textWeight="bold"
-                >
-                  <span className="flex flex-row font-bold items-center justify-center gap-2">
-                    Dashboard <ArrowRight />
-                  </span>
-                </Text>
-              </a>
-              <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] rounded-xl items-start justify-center p-4 sm:p-6">
-                <Text
-                  textType="heading-sm"
-                  textColor="primary"
-                  textWeight="bold"
-                >
-                  Legend
-                </Text>
-                <div className="flex flex-col mt-4 items-start gap-4">
-                  {legendItems.map((item) => (
+                <span className="flex flex-row font-bold items-center justify-center gap-2">
+                  Dashboard <ArrowRight />
+                </span>
+              </Text>
+            </a>
+            <div className="w-full flex flex-col backdrop-blur-sm bg-[#FFFFFF80] rounded-xl items-start justify-center p-4 sm:p-6">
+              <Text textType="heading-sm" textColor="primary" textWeight="bold">
+                Legend
+              </Text>
+              <div className="flex flex-col mt-4 items-start gap-4">
+                {legendItems.map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex flex-row gap-2 items-center justify-center"
+                  >
                     <div
-                      key={item.label}
-                      className="flex flex-row gap-2 items-center justify-center"
-                    >
-                      <div
-                        className="h-[28px] w-[28px] rounded-md"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <Text textType="subtitle-sm" textColor="primary">
-                        {item.label}
-                      </Text>
-                    </div>
-                  ))}
-                </div>
+                      className="h-[28px] w-[28px] rounded-md"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <Text textType="subtitle-sm" textColor="primary">
+                      {item.label}
+                    </Text>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
-      ) : (
-        <div className="mt-20 sm:mt-0">
-          <Text textType="heading-lg">
-            You do not have permission to view this page...
-          </Text>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
