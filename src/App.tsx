@@ -11,9 +11,10 @@ import Button from "./components/Button/Button";
 import Schedule from "./pages/Schedule/Schedule";
 import DiscordCallback from "./pages/Discord/Callback";
 import DiscordLink from "./pages/Discord/Link";
+import RSVP from "./pages/RSVP/RSVP";
 
 function AppContent() {
-  const { setProfile } = useAuth();
+  const { setProfile, profile } = useAuth();
   const [authError, setAuthError] = useState<AuthResult["error"] | null>(null);
   const location = useLocation();
   const previousLocation = useRef(location.pathname);
@@ -53,6 +54,18 @@ function AppContent() {
     performAuthentication();
   }, [location.pathname, performAuthentication]);
 
+  // Restrict access for accepted, not confirmed, not rejected users
+  const isRSVPOnly =
+    profile &&
+    profile.status.accepted &&
+    !profile.status.confirmed &&
+    !profile.status.rejected;
+  const allowedRSVPRoutes = ["/rsvp", "/callback"];
+  if (isRSVPOnly && !allowedRSVPRoutes.includes(location.pathname)) {
+    window.location.replace("/rsvp");
+    return null;
+  }
+
   const handleRetry = () => {
     // Clear any error state and redirect tracking, then reload
     setAuthError(null);
@@ -75,6 +88,7 @@ function AppContent() {
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/" element={<Home />} />
         <Route path="/callback" element={<Callback />} />
+        <Route path="/rsvp" element={<RSVP />} />
         <Route path="/discord">
           <Route path="callback" element={<DiscordCallback />} />
           <Route path="link" element={<DiscordLink />} />
