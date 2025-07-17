@@ -14,7 +14,7 @@ import ModalPortal from "./ModalPortal";
 export default function EventsList() {
   const parseTime = useCallback(
     (iso: string) => new Date(iso.replace(/Z$/, "")),
-    [],
+    []
   );
   const parseDate = (isoDate: string) => {
     const [year, month, day] = isoDate.split("-").map(Number);
@@ -27,7 +27,7 @@ export default function EventsList() {
     "Ceremonies",
     "Activities",
     "Food",
-    "Workshops",
+    "Workshops"
   ];
 
   const TYPE_BORDER: Record<string, string> = {
@@ -36,7 +36,7 @@ export default function EventsList() {
     Ceremonies: "#0A7837",
     Activities: "#0dc6de",
     Food: "#edc009",
-    Workshops: "#E42027",
+    Workshops: "#E42027"
   };
 
   const [selected, setSelected] = useState<EventFields | null>(null);
@@ -59,14 +59,14 @@ export default function EventsList() {
   const latestHour = endDates.length
     ? Math.max(
         ...endDates.map((d) =>
-          d.getMinutes() ? d.getHours() + 1 : d.getHours(),
-        ),
+          d.getMinutes() ? d.getHours() + 1 : d.getHours()
+        )
       )
     : 20;
 
   const HOURS = Array.from(
     { length: latestHour - earliestHour + 1 },
-    (_, i) => earliestHour + i,
+    (_, i) => earliestHour + i
   );
   const TOTAL_SLOTS = HOURS.length * PERIODS_PER_HOUR;
 
@@ -77,7 +77,7 @@ export default function EventsList() {
       const minuteSlot = Math.floor(d.getMinutes() / (60 / PERIODS_PER_HOUR));
       return hourIdx * PERIODS_PER_HOUR + minuteSlot + 1;
     },
-    [HOURS, PERIODS_PER_HOUR, parseTime],
+    [HOURS, PERIODS_PER_HOUR, parseTime]
   );
 
   const getRowSpan = (startTs: string, endTs: string) => {
@@ -106,11 +106,11 @@ export default function EventsList() {
   if (error) return <p className="text-red-600">Error: {error}</p>;
 
   const filtered = events.filter((ev) =>
-    filterItem ? ev.fields.Type === filterItem : true,
+    filterItem ? ev.fields.Type === filterItem : true
   );
   const sorted = [...filtered].sort(
     (a, b) =>
-      parseTime(a.fields.Start).getTime() - parseTime(b.fields.Start).getTime(),
+      parseTime(a.fields.Start).getTime() - parseTime(b.fields.Start).getTime()
   );
 
   const overlapInfo = sorted.reduce(
@@ -126,7 +126,7 @@ export default function EventsList() {
       acc[ev.id] = { count: collisions.length, index };
       return acc;
     },
-    {} as Record<string, { count: number; index: number }>,
+    {} as Record<string, { count: number; index: number }>
   );
 
   return (
@@ -139,7 +139,7 @@ export default function EventsList() {
               className="flex-1 text-center cursor-pointer"
               onClick={() => setDate(d)}
               style={{
-                borderBottom: `${date === d ? "3px #F47F1F" : "1px black"} solid`,
+                borderBottom: `${date === d ? "3px #F47F1F" : "1px black"} solid`
               }}
             >
               <Text
@@ -150,7 +150,7 @@ export default function EventsList() {
                 <span
                   style={{
                     color: date === d ? "#F47F1F" : "#08566B",
-                    fontWeight: date === d ? 600 : 400,
+                    fontWeight: date === d ? 600 : 400
                   }}
                 >
                   {format(parseDate(d), "EEE. MMM d")}
@@ -192,7 +192,7 @@ export default function EventsList() {
                   }`}
                   style={{
                     backgroundColor: isActive ? "#F47F1F" : "transparent",
-                    border: `2px solid ${TYPE_BORDER[type]}`,
+                    border: `2px solid ${TYPE_BORDER[type]}`
                   }}
                 >
                   {type}
@@ -203,12 +203,56 @@ export default function EventsList() {
         )}
       </div>
 
-      <div className="flex flex-1 overflow-auto">
+      {/* Mobile List View */}
+      <div className="flex-1 flex flex-col gap-2 sm:hidden overflow-y-auto">
+        {!loading &&
+          sorted.map(({ id, fields }) => (
+            <div
+              key={id}
+              className="bg-white rounded-lg shadow p-4 flex flex-col gap-1 cursor-pointer border-l-4"
+              style={{ borderColor: TYPE_BORDER[fields.Type] }}
+              onClick={() => setSelected(fields)}
+            >
+              <div className="flex items-center justify-between">
+                <Text
+                  textType="subtitle-sm"
+                  textColor="primary"
+                  textWeight="bold"
+                >
+                  {fields.Name}
+                </Text>
+                <span
+                  className="text-xs font-semibold"
+                  style={{ color: TYPE_BORDER[fields.Type] }}
+                >
+                  {fields.Type}
+                </span>
+              </div>
+              <Text textType="paragraph-sm" textColor="primary">
+                {format(parseTime(fields.Start), "h:mm a")} –{" "}
+                {format(parseTime(fields.End), "h:mm a")} @{" "}
+                {fields.Location ?? "TBD"}
+              </Text>
+              {fields.Description && (
+                <Text
+                  textType="paragraph-sm"
+                  textColor="primary"
+                  className="line-clamp-2"
+                >
+                  {fields.Description}
+                </Text>
+              )}
+            </div>
+          ))}
+      </div>
+
+      {/* Desktop Timeline/Grid View */}
+      <div className="flex flex-1 overflow-auto hidden sm:flex">
         <div
           className="relative grid grid-cols-[60px] sm:grid-cols-[80px] gap-[1px] flex-shrink-0"
           style={{
             gridTemplateRows: `repeat(${TOTAL_SLOTS}, ${SLOT_HEIGHT}px)`,
-            minHeight: `${TOTAL_SLOTS * SLOT_HEIGHT}px`,
+            minHeight: `${TOTAL_SLOTS * SLOT_HEIGHT}px`
           }}
         >
           {HOURS.map((h, i) => (
@@ -217,7 +261,7 @@ export default function EventsList() {
               className="text-left text-xs sm:text-sm text-[#08566B] font-bold"
               style={{
                 gridColumn: 1,
-                gridRow: `${i * PERIODS_PER_HOUR + 1} / span ${PERIODS_PER_HOUR}`,
+                gridRow: `${i * PERIODS_PER_HOUR + 1} / span ${PERIODS_PER_HOUR}`
               }}
             >
               {h === 0
@@ -236,7 +280,7 @@ export default function EventsList() {
             className="relative grid grid-cols-[1fr] gap-[1px] min-w-[320px] sm:min-w-[720px]"
             style={{
               gridTemplateRows: `repeat(${TOTAL_SLOTS}, ${SLOT_HEIGHT}px)`,
-              minHeight: `${TOTAL_SLOTS * SLOT_HEIGHT}px`,
+              minHeight: `${TOTAL_SLOTS * SLOT_HEIGHT}px`
             }}
           >
             {!loading &&
@@ -255,7 +299,7 @@ export default function EventsList() {
                       gridColumn: 1,
                       gridRow: `${startRow} / span ${span}`,
                       width: `${slotWidth}%`,
-                      marginLeft: `${leftOffset}%`,
+                      marginLeft: `${leftOffset}%`
                     }}
                   >
                     <Event
