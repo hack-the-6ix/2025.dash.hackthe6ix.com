@@ -270,7 +270,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 w-full justify-center mt-2 items-center">
                   <a
                     className="flex flex-row gap-4 items-center cursor-pointer w-full sm:w-auto"
-                    href="https://www.notion.so/hackthe6ix/Hack-the-6ix-2025-f03f9b3e42744b48a52c64a180159353"
+                    href="https://hackthe6ix.notion.site/hackers-2025"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
